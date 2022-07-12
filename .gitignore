@@ -1,0 +1,11 @@
+project/*.png
+project/*.sln
+project/*.vcxproj
+project/*.filters
+project/*.user
+project/main.cpp
+project/todo.txt
+project/Debug/
+project/.vs/
+project/PerlinNoise.hpp
+project/earth.bin
