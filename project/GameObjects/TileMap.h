@@ -15,6 +15,7 @@ public:
 	virtual ~TileMap();
 
 	bool loadMap(sf::Vector2u tileSize, std::vector<int> map, float scale = 1.0);
+	bool loadMap(sf::Vector2u tileSize, float scale = 1.0); //Loads no array
 	bool updateTile(sf::Vector2u tileSpace, int newVal); //Changes a value at an index in the map array, as well as the map itself
 	bool updateTile(sf::Vector2u tileSpace, int R, int G, int B, int A); //Changes a tile's color without changing the map array
 	std::vector<int> getMapArray() const;

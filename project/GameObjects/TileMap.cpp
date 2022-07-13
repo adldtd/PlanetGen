@@ -18,6 +18,29 @@ TileMap::TileMap(unsigned int w, unsigned int h) {
 TileMap::~TileMap() {}
 
 
+bool TileMap::loadMap(sf::Vector2u tileSize, float scale)
+{
+	tileWidth = tileSize.x * scale;
+	tileHeight = tileSize.y * scale;
+
+	texturePixelWidth = 0;
+	texturePixelHeight = 0;
+
+	for (unsigned int i = 0; i < height; i++) {
+		for (unsigned int j = 0; j < width; j++) {
+
+			sf::Vertex* tile = &obj[(j + (i * width)) * 4];
+
+			tile[0].position = sf::Vector2f(j * tileWidth, i * tileHeight);
+			tile[1].position = sf::Vector2f((j + 1) * tileWidth, i * tileHeight);
+			tile[2].position = sf::Vector2f((j + 1) * tileWidth, (i + 1) * tileHeight);
+			tile[3].position = sf::Vector2f(j * tileWidth, (i + 1) * tileHeight);
+		}
+	}
+
+	return true;
+}
+
 bool TileMap::loadMap(sf::Vector2u tileSize, std::vector<int> map, float scale) {
 	
 	if (map.size() != (width * height)) { //Incompatible map size

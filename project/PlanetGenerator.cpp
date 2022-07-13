@@ -3,6 +3,7 @@
 #include <cmath>
 #include <fstream>
 #include <chrono>
+#include <mutex>
 #include "PerlinNoise.hpp"
 #include "PlanetGenerator.h"
 
@@ -55,7 +56,10 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 	double* moisture = new double[length];
 	double* climate = new double[length]; //Determines the climate type of each step
 
-	generateEarth(lengthX, lengthY, fileLocation, buffer, elevation, moisture, climate, seed);
+	int stage = 0;
+	int progress = 0;
+
+	generateEarth(lengthX, lengthY, fileLocation, buffer, elevation, moisture, climate, stage, progress, seed);
 
 	delete[] buffer;
 	delete[] elevation;
@@ -63,8 +67,8 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 	delete[] climate;
 }
 
-void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileLocation,
-				   char* buffer, double* elevation, double* moisture, double* climate, unsigned int seed) {
+void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileLocation, char* buffer, double* elevation,
+				   double* moisture, double* climate, int &stage, int &progress, unsigned int seed, std::mutex* phone, bool useMutex) {
 
 	if (seed == 0) {
 		auto t = std::chrono::system_clock::now();
@@ -73,7 +77,7 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 	else
 		srand(seed);
 
-	bool polarX = true;
+	bool polarX = false;
 	bool polarY = false;
 
 	siv::PerlinNoise::seed_type continentSeed = rand();
@@ -161,6 +165,7 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 
 
 			int index = c + (r * lengthX);
+			int output = 0;
 
 			if (result < LANDPOINT - 0.08) {
 
@@ -189,31 +194,37 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 				result = result / 4.0; //Scaling
 
 				if (result < LANDPOINT - 0.08)
-					buffer[index] = 0;
+					output = 0;
 				else if (result < LANDPOINT - 0.03)
-					buffer[index] = 1;
+					output = 1;
 				else if (result < LANDPOINT)
-					buffer[index] = 2;
+					output = 2;
 				else
-					buffer[index] = 3;
+					output = 3;
 
 			}
 			else if (result < LANDPOINT - 0.03) {
-				buffer[index] = 1; //Shallowish water
+				output = 1; //Shallowish water
 			}
 			else if (result < LANDPOINT) {
-				buffer[index] = 2; //Shallow water
+				output = 2; //Shallow water
 			}
 			else
-				buffer[index] = 3; //Land
+				output = 3; //Land
 
 			elevation[index] = result;
+
+
+			if (useMutex) phone->lock(); //Danger zone
+			buffer[index] = output;
+			progress++;
+			if (useMutex) phone->unlock();
 		}
 	}
 
 
 	
-	std::cout << "Generating biomes" << std::endl;
+	std::cout << "Generating heat" << std::endl;
 	siv::PerlinNoise::seed_type climateSeed = rand();
 	siv::PerlinNoise clgen{ climateSeed };
 	//double factor = 1.0 / normalFunction(equator, equator, 100.0); //Range is from 1 to 0
@@ -277,6 +288,7 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 
 
 
+	std::cout << "Generating biomes" << std::endl;
 	for (int r = 0; r < lengthY; r++) { //Biome generation
 
 		double angleY = 0.0;
@@ -290,6 +302,7 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 				angleX = (c / double(lengthX)) * TWOPI;
 
 			int index = c + (r * lengthX);
+			int output = buffer[index];
 
 			double result = 0.0;
 			if (polarX && polarY) { //TODO; needs 4D Perlin noise
@@ -319,46 +332,46 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 				if (result < -1.17) { //******************************************************************Arid
 
 					if (climate[index] < 0.11) { //Cold
-						buffer[index] = genIceSheet(r, c);
+						output = genIceSheet(r, c);
 					}
 					else if (climate[index] < 0.22) { //Cold to chilly
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genRockyCliff(r, c);
+							output = genRockyCliff(r, c);
 						else
-							buffer[index] = genRockySnowyPlains(r, c);
+							output = genRockySnowyPlains(r, c);
 					}
 					else if (climate[index] < 0.33) { //Chilly
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genRockyCliff(r, c);
+							output = genRockyCliff(r, c);
 						else
-							buffer[index] = genRockyPlains(r, c);
+							output = genRockyPlains(r, c);
 					}
 					else if (climate[index] < 0.44) { //Chilly to cool
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genRockyBeach(r, c);
+							output = genRockyBeach(r, c);
 						else
-							buffer[index] = genRockyPlains(r, c);
+							output = genRockyPlains(r, c);
 					}
 					else if (climate[index] < 0.55) { //Cool
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genPlains(r, c);
+							output = genPlains(r, c);
 					}
 					else if (climate[index] < 0.66) { //Cool to warm
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genAridPlains(r, c);
+							output = genAridPlains(r, c);
 					}
 					else if (climate[index] < 0.77) { //Warm
-						buffer[index] = genDesert(r, c);
+						output = genDesert(r, c);
 					}
 					else if (climate[index] < 0.88) { //Warm to hot
-						buffer[index] = genDesert(r, c);
+						output = genDesert(r, c);
 					}
 					else { //Hot
-						buffer[index] = genDesert(r, c);
+						output = genDesert(r, c);
 					}
 
 				}
@@ -366,33 +379,33 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 
 					if (climate[index] < 0.2) { //Cold
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genRockyCliff(r, c);
+							output = genRockyCliff(r, c);
 						else
-							buffer[index] = genRockyTundra(r, c);
+							output = genRockyTundra(r, c);
 					}
 					else if (climate[index] < 0.4) { //Chilly
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genRockyBeach(r, c);
+							output = genRockyBeach(r, c);
 						else
-							buffer[index] = genRockyConiferousForestPlains(r, c);
+							output = genRockyConiferousForestPlains(r, c);
 					}
 					else if (climate[index] < 0.6) { //Cool
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genPlains(r, c);
+							output = genPlains(r, c);
 					}
 					else if (climate[index] < 0.8) { //Warm
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genAridGrasslands(r, c);
+							output = genAridGrasslands(r, c);
 					}
 					else { //Hot
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genAridGrasslands(r, c);
+							output = genAridGrasslands(r, c);
 					}
 
 				}
@@ -400,57 +413,57 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 
 					if (climate[index] < 0.11) { //Cold
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genRockyCliff(r, c);
+							output = genRockyCliff(r, c);
 						else
-							buffer[index] = genTundra(r, c);
+							output = genTundra(r, c);
 					}
 					else if (climate[index] < 0.22) { //Cold to chilly
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genRockyBeach(r, c);
+							output = genRockyBeach(r, c);
 						else
-							buffer[index] = genSnowyTaiga(r, c);
+							output = genSnowyTaiga(r, c);
 					}
 					else if (climate[index] < 0.33) { //Chilly
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genTaiga(r, c);
+							output = genTaiga(r, c);
 					}
 					else if (climate[index] < 0.44) { //Chilly to cool
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genConiferousForestPlains(r, c);
+							output = genConiferousForestPlains(r, c);
 					}
 					else if (climate[index] < 0.55) { //Cool
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genPlains(r, c);
+							output = genPlains(r, c);
 					}
 					else if (climate[index] < 0.66) { //Cool to warm
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genGrassyPlains(r, c);
+							output = genGrassyPlains(r, c);
 					}
 					else if (climate[index] < 0.77) { //Warm
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genGrasslands(r, c);
+							output = genGrasslands(r, c);
 					}
 					else if (climate[index] < 0.88) { //Warm to hot
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genGrasslands(r, c);
+							output = genGrasslands(r, c);
 					}
 					else { //Hot
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genGrasslands(r, c);
+							output = genGrasslands(r, c);
 					}
 
 				}
@@ -458,33 +471,33 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 
 					if (climate[index] < 0.2) { //Cold
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genRockyBeach(r, c);
+							output = genRockyBeach(r, c);
 						else
-							buffer[index] = genSnowyTaiga(r, c);
+							output = genSnowyTaiga(r, c);
 					}
 					else if (climate[index] < 0.4) { //Chilly
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genConiferousForest(r, c);
+							output = genConiferousForest(r, c);
 					}
 					else if (climate[index] < 0.6) { //Cool
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genDeciduousForestPlains(r, c);
+							output = genDeciduousForestPlains(r, c);
 					}
 					else if (climate[index] < 0.8) { //Warm
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genGrassyPlains(r, c);
+							output = genGrassyPlains(r, c);
 					}
 					else { //Hot
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genSavanna(r, c);
+							output = genSavanna(r, c);
 					}
 
 				}
@@ -492,57 +505,57 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 
 					if (climate[index] < 0.11) { //Cold
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genTaiga(r, c);
+							output = genTaiga(r, c);
 					}
 					else if (climate[index] < 0.22) { //Cold to chilly
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genConiferousForest(r, c);
+							output = genConiferousForest(r, c);
 					}
 					else if (climate[index] < 0.33) { //Chilly
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genConiferousForest(r, c);
+							output = genConiferousForest(r, c);
 					}
 					else if (climate[index] < 0.44) { //Chilly to cool
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genMixedForestPlains(r, c);
+							output = genMixedForestPlains(r, c);
 					}
 					else if (climate[index] < 0.55) { //Cool
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genDeciduousForestPlains(r, c);
+							output = genDeciduousForestPlains(r, c);
 					}
 					else if (climate[index] < 0.66) { //Cool to warm
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genDeciduousForestPlains(r, c);
+							output = genDeciduousForestPlains(r, c);
 					}
 					else if (climate[index] < 0.77) { //Warm
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genPlains(r, c);
+							output = genPlains(r, c);
 					}
 					else if (climate[index] < 0.88) { //Warm to hot
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genPlains(r, c);
+							output = genPlains(r, c);
 					}
 					else { //Hot
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genPlains(r, c);
+							output = genPlains(r, c);
 					}
 
 				}
@@ -550,33 +563,33 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 
 					if (climate[index] < 0.2) { //Cold
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genConiferousForest(r, c);
+							output = genConiferousForest(r, c);
 					}
 					else if (climate[index] < 0.4) { //Chilly
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genConiferousForest(r, c);
+							output = genConiferousForest(r, c);
 					}
 					else if (climate[index] < 0.6) { //Cool
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genDeciduousForest(r, c);
+							output = genDeciduousForest(r, c);
 					}
 					else if (climate[index] < 0.8) { //Warm
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genDeciduousForestPlains(r, c);
+							output = genDeciduousForestPlains(r, c);
 					}
 					else { //Hot
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genMonsoonPlains(r, c);
+							output = genMonsoonPlains(r, c);
 					}
 
 				}
@@ -584,57 +597,57 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 
 					if (climate[index] < 0.11) { //Cold
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genConiferousForest(r, c);
+							output = genConiferousForest(r, c);
 					}
 					else if (climate[index] < 0.22) { //Cold to chilly
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genConiferousForest(r, c);
+							output = genConiferousForest(r, c);
 					}
 					else if (climate[index] < 0.33) { //Chilly
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genConiferousForest(r, c);
+							output = genConiferousForest(r, c);
 					}
 					else if (climate[index] < 0.44) { //Chilly to cool
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genMixedForest(r, c);
+							output = genMixedForest(r, c);
 					}
 					else if (climate[index] < 0.55) { //Cool
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genDeciduousForest(r, c);
+							output = genDeciduousForest(r, c);
 					}
 					else if (climate[index] < 0.66) { //Cool to warm
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genDeciduousForest(r, c);
+							output = genDeciduousForest(r, c);
 					}
 					else if (climate[index] < 0.77) { //Warm
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genDeciduousForest(r, c);
+							output = genDeciduousForest(r, c);
 					}
 					else if (climate[index] < 0.88) { //Warm to hot
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genMuddyForest(r, c);
+							output = genMuddyForest(r, c);
 					}
 					else { //Hot
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genMonsoon(r, c);
+							output = genMonsoon(r, c);
 					}
 
 				}
@@ -642,33 +655,33 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 
 					if (climate[index] < 0.2) { //Cold
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genMuddyBeach(r, c);
+							output = genMuddyBeach(r, c);
 						else
-							buffer[index] = genMuddyConiferousForest(r, c);
+							output = genMuddyConiferousForest(r, c);
 					}
 					else if (climate[index] < 0.4) { //Chilly
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genMuddyConiferousForest(r, c);
+							output = genMuddyConiferousForest(r, c);
 					}
 					else if (climate[index] < 0.6) { //Cool
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genGrassyDeciduousForestPlains(r, c);
+							output = genGrassyDeciduousForestPlains(r, c);
 					}
 					else if (climate[index] < 0.8) { //Warm
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genMuddyBeach(r, c);
+							output = genMuddyBeach(r, c);
 						else
-							buffer[index] = genMuddyForest(r, c);
+							output = genMuddyForest(r, c);
 					}
 					else { //Hot
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genMuddyBeach(r, c);
+							output = genMuddyBeach(r, c);
 						else
-							buffer[index] = genSeasonalRainforest(r, c);
+							output = genSeasonalRainforest(r, c);
 					}
 
 				}
@@ -676,57 +689,57 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 
 					if (climate[index] < 0.11) { //Cold
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genConiferousSaltSwamp(r, c);
+							output = genConiferousSaltSwamp(r, c);
 						else
-							buffer[index] = genConiferousSwamp(r, c);
+							output = genConiferousSwamp(r, c);
 					}
 					else if (climate[index] < 0.22) { //Cold to chilly
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genMuddyBeach(r, c);
+							output = genMuddyBeach(r, c);
 						else
-							buffer[index] = genConiferousSwamp(r, c);
+							output = genConiferousSwamp(r, c);
 					}
 					else if (climate[index] < 0.33) { //Chilly
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genMuddyBeach(r, c);
+							output = genMuddyBeach(r, c);
 						else
-							buffer[index] = genMuddyConiferousForest(r, c);
+							output = genMuddyConiferousForest(r, c);
 					}
 					else if (climate[index] < 0.44) { //Chilly to cool
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genMuddyBeach(r, c);
+							output = genMuddyBeach(r, c);
 						else
-							buffer[index] = genMuddyGrasslandsConiferousForest(r, c);
+							output = genMuddyGrasslandsConiferousForest(r, c);
 					}
 					else if (climate[index] < 0.55) { //Cool
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genBeach(r, c);
+							output = genBeach(r, c);
 						else
-							buffer[index] = genTallGrasslands(r, c);
+							output = genTallGrasslands(r, c);
 					}
 					else if (climate[index] < 0.66) { //Cool to warm
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genMuddyBeach(r, c);
+							output = genMuddyBeach(r, c);
 						else
-							buffer[index] = genMarshyGrasslands(r, c);
+							output = genMarshyGrasslands(r, c);
 					}
 					else if (climate[index] < 0.77) { //Warm
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genSaltSwamp(r, c);
+							output = genSaltSwamp(r, c);
 						else
-							buffer[index] = genSwamp(r, c);
+							output = genSwamp(r, c);
 					}
 					else if (climate[index] < 0.88) { //Warm to hot
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genSaltSwamp(r, c);
+							output = genSaltSwamp(r, c);
 						else
-							buffer[index] = genMuddySwamp(r, c);
+							output = genMuddySwamp(r, c);
 					}
 					else { //Hot
 						if (elevation[index] < BEACHPOINT)
-							buffer[index] = genSaltSwamp(r, c);
+							output = genSaltSwamp(r, c);
 						else
-							buffer[index] = genEvergreenRainforest(r, c);
+							output = genEvergreenRainforest(r, c);
 					}
 
 				}
@@ -735,6 +748,11 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 
 			moisture[index] = result;
 
+
+			if (useMutex) phone->lock();
+			buffer[index] = output;
+			progress++;
+			if (useMutex) phone->unlock();
 		}
 
 	}
@@ -752,6 +770,11 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 	earthFile.write(sizeX, 4); earthFile.write(sizeY, 4);
 	earthFile.write(buffer, length);
 	earthFile.close();
+	std::cout << "Complete" << std::endl;
+
+	if (useMutex) phone->lock();
+	stage++;
+	if (useMutex) phone->unlock();
 }
 
 double normalFunction(double x, double mean, double deviation) { //Returns a value on the normal distribution
