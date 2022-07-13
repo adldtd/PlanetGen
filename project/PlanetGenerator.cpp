@@ -47,14 +47,34 @@
 */
 
 
-void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileLocation) {
+void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileLocation, unsigned int seed)
+{
+	unsigned int length = lengthX * lengthY;
+	char* buffer = new char[length];
+	double* elevation = new double[length]; //Records the elevation of each step
+	double* moisture = new double[length];
+	double* climate = new double[length]; //Determines the climate type of each step
 
-	//auto t = std::chrono::system_clock::now();
-	//srand(t.time_since_epoch().count());
-	srand(500u);
+	generateEarth(lengthX, lengthY, fileLocation, buffer, elevation, moisture, climate, seed);
+
+	delete[] buffer;
+	delete[] elevation;
+	delete[] moisture;
+	delete[] climate;
+}
+
+void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileLocation,
+				   char* buffer, double* elevation, double* moisture, double* climate, unsigned int seed) {
+
+	if (seed == 0) {
+		auto t = std::chrono::system_clock::now();
+		srand(t.time_since_epoch().count());
+	}
+	else
+		srand(seed);
 
 	bool polarX = true;
-	bool polarY = true;
+	bool polarY = false;
 
 	siv::PerlinNoise::seed_type continentSeed = rand();
 	siv::PerlinNoise::seed_type islandSeed = rand();
@@ -70,13 +90,10 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 
 	unsigned int length = lengthX * lengthY;
 
-	char* buffer = new char[length];
-	double* elevation = new double[length]; //Records the elevation of each step
-	double* moisture = new double[length];
-	double* climate = new double[length]; //Determines the climate type of each step
-
 	//Continent variables
-	double LANDPOINT = 0.30; //Larger means more land
+	double LANDCRUNCHER = 1.0; //Larger means beefier continents
+	double ISLANDCRUNCHER = 1.0; //Larger means beefier islands
+	double LANDPOINT = 0.30; //Same effect as increasing landcruncher
 	double SPARSITY = 350.0; //This value works best at lengths 1472u 736u; larger means more space between land and sea
 	double ISPARSITY = SPARSITY / 7.0; //Sparsity, but for islands
 	double IPOINT = -0.01; //The point at which an island is most likely to spawn; farther from landpoint means farther from land
@@ -90,7 +107,8 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 	double MAXMODIFY = 1 - RANGEEND; //The largest value that will be added to the range; the larger it is the more "hotter" the equator will be
 
 	//Biome variables
-	double BEACHPOINT = 0.33; //Larger means more and more land will be a beach biome
+	double MOISTURECRUNCHER = 1.0;
+	double BEACHPOINT = 0.32; //Larger means more and more land will be a beach biome
 
 	const double TWOPI = 6.2832;
 	double angleRadiusX = (1.0 / SPARSITY) / (TWOPI / double(lengthX));
@@ -124,20 +142,22 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 				double pX1 = cos(angleX); double pY1 = sin(angleX);
 				double pX2 = cos(angleY); double pY2 = sin(angleY);
 				result = cgen.noise4D(pX1 * angleRadiusX, pY1 * angleRadiusX, pX2 * angleRadiusY, pY2 * angleRadiusY) + cgen.octave4D(pX1 * angleRadiusX, pY1 * angleRadiusX, pX2 * angleRadiusY, pY2 * angleRadiusY, 10);
-				result *= 1.0;
+				result *= LANDCRUNCHER;
 			}
 			else if (polarX) {
 				double pX = cos(angleX); double pY = sin(angleX);
 				result = cgen.noise3D(pX * angleRadiusX, pY * angleRadiusX, r / SPARSITY) + cgen.octave3D(pX * angleRadiusX, pY * angleRadiusX, r / SPARSITY, 10);
-				result *= 1.0; //Scaled
+				result *= LANDCRUNCHER; //Scaled
 			}
 			else if (polarY) {
 				double pX = cos(angleY); double pY = sin(angleY);
 				result = cgen.noise3D(pX * angleRadiusY, pY * angleRadiusY, c / SPARSITY) + cgen.octave3D(pX * angleRadiusY, pY * angleRadiusY, c / SPARSITY, 10);
-				result *= 1.0;
+				result *= LANDCRUNCHER;
 			}
-			else //No looping
+			else { //No looping
 				result = cgen.noise2D(c / SPARSITY, r / SPARSITY) + cgen.octave2D(c / SPARSITY, r / SPARSITY, 10);
+				result *= LANDCRUNCHER;
+			}
 
 
 			int index = c + (r * lengthX);
@@ -149,20 +169,22 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 					double pX1 = cos(angleX); double pY1 = sin(angleX);
 					double pX2 = cos(angleY); double pY2 = sin(angleY);
 					result = igen.noise4D(pX1 * iAngleRadiusX, pY1 * iAngleRadiusX, pX2 * iAngleRadiusY, pY2 * iAngleRadiusY) + igen.octave4D(pX1 * iAngleRadiusX, pY1 * iAngleRadiusX, pX2 * iAngleRadiusY, pY2 * iAngleRadiusY, 4);
-					result *= 1.0;
+					result *= ISLANDCRUNCHER;
 				}
 				else if (polarX) {
 					double pX = cos(angleX); double pY = sin(angleX);
 					result = igen.noise3D(pX * iAngleRadiusX, pY * iAngleRadiusX, r / ISPARSITY) + igen.octave3D(pX * iAngleRadiusX, pY * iAngleRadiusX, r / ISPARSITY, 4);
-					result *= 1.0;
+					result *= ISLANDCRUNCHER;
 				}
 				else if (polarY) {
 					double pX = cos(angleY); double pY = sin(angleY);
 					result = igen.noise3D(pX * iAngleRadiusY, pY * iAngleRadiusY, c / ISPARSITY) + igen.octave3D(pX * iAngleRadiusY, pY * iAngleRadiusY, c / ISPARSITY, 4);
-					result *= 1.0;
+					result *= ISLANDCRUNCHER;
 				}
-				else
+				else {
 					result = igen.noise2D(c / ISPARSITY, r / ISPARSITY) + igen.octave2D(c / ISPARSITY, r / ISPARSITY, 4);
+					result *= ISLANDCRUNCHER;
+				}
 				result -= shoreFactor;
 				result = result / 4.0; //Scaling
 
@@ -236,8 +258,10 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 				heatValue = clgen.noise3D(pX * angleRadiusY, pY * angleRadiusY, c / SPARSITY) + clgen.octave3D(pX * angleRadiusY, pY * angleRadiusY, c / SPARSITY, 6);
 				heatValue *= CLIMATECRUNCHER;
 			}
-			else
+			else {
 				heatValue = clgen.noise2D(c / SPARSITY, r / SPARSITY) + clgen.octave2D(c / SPARSITY, r / SPARSITY, 6);
+				heatValue *= CLIMATECRUNCHER;
+			}
 			
 			if (USINGEQUATOR)
 				heatValue = normalizeToRange(-1, 1, RANGESTART + modify, RANGEEND + modify, heatValue);
@@ -272,20 +296,22 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 				double pX1 = cos(angleX); double pY1 = sin(angleX);
 				double pX2 = cos(angleY); double pY2 = sin(angleY);
 				result = mgen.noise4D(pX1 * angleRadiusX, pY1 * angleRadiusX, pX2 * angleRadiusY, pY2 * angleRadiusY) + mgen.octave4D(pX1 * angleRadiusX, pY1 * angleRadiusX, pX2 * angleRadiusY, pY2 * angleRadiusY, 10);
-				result *= 0.6826;
+				result *= MOISTURECRUNCHER;
 			}
 			else if (polarX) {
 				double pX = cos(angleX); double pY = sin(angleX);
 				result = mgen.noise3D(pX * angleRadiusX, pY * angleRadiusX, r / SPARSITY) + mgen.octave3D(pX * angleRadiusX, pY * angleRadiusX, r / SPARSITY, 10);
-				result *= 0.6826; //Scaled
+				result *= MOISTURECRUNCHER; //Scaled
 			}
 			else if (polarY) {
 				double pX = cos(angleY); double pY = sin(angleY);
 				result = mgen.noise3D(pX * angleRadiusY, pY * angleRadiusY, c / SPARSITY) + mgen.octave3D(pX * angleRadiusY, pY * angleRadiusY, c / SPARSITY, 10);
-				result *= 0.6826;
+				result *= MOISTURECRUNCHER;
 			}
-			else //No looping
+			else { //No looping
 				result = mgen.noise2D(c / SPARSITY, r / SPARSITY) + mgen.octave2D(c / SPARSITY, r / SPARSITY, 10);
+				result *= MOISTURECRUNCHER;
+			}
 			result *= 0.955414;
 
 			if (buffer[index] == 3) { //Land
@@ -726,10 +752,6 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 	earthFile.write(sizeX, 4); earthFile.write(sizeY, 4);
 	earthFile.write(buffer, length);
 	earthFile.close();
-	delete[] buffer;
-	delete[] elevation;
-	delete[] moisture;
-	delete[] climate;
 }
 
 double normalFunction(double x, double mean, double deviation) { //Returns a value on the normal distribution

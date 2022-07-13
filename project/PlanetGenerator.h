@@ -1,7 +1,9 @@
 #pragma once
 #include <iostream>
 
-void generateEarth(unsigned int chunksX, unsigned int chunksY, std::string fileLocation);
+void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileLocation,
+	char* buffer, double* elevation, double* moisture, double* climate, unsigned int seed = 0);
+void generateEarth(unsigned int chunksX, unsigned int chunksY, std::string fileLocation, unsigned int seed = 0);
 double normalFunction(double x, double mean = 0.0, double deviation = 1.0);
 double normalizeToRange(double ix1, double ix2, double tx1, double tx2, double i);
 
