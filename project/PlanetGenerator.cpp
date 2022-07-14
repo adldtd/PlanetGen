@@ -216,7 +216,7 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 
 
 			if (useMutex) phone->lock(); //Danger zone
-			buffer[index] = output;
+			buffer[index] = (char)output;
 			progress++;
 			if (useMutex) phone->unlock();
 		}
@@ -750,7 +750,7 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 
 
 			if (useMutex) phone->lock();
-			buffer[index] = output;
+			buffer[index] = (char)output;
 			progress++;
 			if (useMutex) phone->unlock();
 		}
@@ -788,6 +788,159 @@ double normalizeToRange(double ix1, double ix2, double tx1, double tx2, double i
 	double m = (tx2 - tx1) / (ix2 - ix1);
 	double dist = tx2 - (ix2 * m);
 	return (i * m) + dist;
+}
+
+
+
+void returnRGBA(int val, int* rgb)
+{
+	switch (val) //Different coloring
+	{
+		case 0:
+			rgb[0] = 0;
+			rgb[1] = 0;
+			rgb[2] = 130;
+			rgb[3] = 255;
+			break;
+		case 1:
+			rgb[0] = 0;
+			rgb[1] = 0;
+			rgb[2] = 207;
+			rgb[3] = 255;
+			break;
+		case 2:
+			rgb[0] = 0;
+			rgb[1] = 0;
+			rgb[2] = 255;
+			rgb[3] = 255;
+			break;
+		case 3:
+			rgb[0] = 0;
+			rgb[1] = 200;
+			rgb[2] = 0;
+			rgb[3] = 255;
+			break;
+		case 4:
+			rgb[0] = 247;
+			rgb[1] = 247;
+			rgb[2] = 116;
+			rgb[3] = 255;
+			break;
+		case 5:
+			rgb[0] = 184;
+			rgb[1] = 184;
+			rgb[2] = 70;
+			rgb[3] = 255;
+			break;
+		case 6:
+			rgb[0] = 232;
+			rgb[1] = 115;
+			rgb[2] = 60;
+			rgb[3] = 255;
+			break;
+		case 7:
+			rgb[0] = 245;
+			rgb[1] = 107;
+			rgb[2] = 27;
+			rgb[3] = 255;
+			break;
+		case 8:
+			rgb[0] = 69;
+			rgb[1] = 196;
+			rgb[2] = 43;
+			rgb[3] = 255;
+			break;
+		case 9:
+			rgb[0] = 43;
+			rgb[1] = 0;
+			rgb[2] = 0;
+			rgb[3] = 255;
+			break;
+		case 10:
+			rgb[0] = 0;
+			rgb[1] = 133;
+			rgb[2] = 13;
+			rgb[3] = 255;
+			break;
+		case 11:
+			rgb[0] = 0;
+			rgb[1] = 138;
+			rgb[2] = 13;
+			rgb[3] = 255;
+			break;
+		case 12:
+			rgb[0] = 117;
+			rgb[1] = 0;
+			rgb[2] = 0;
+			rgb[3] = 255;
+			break;
+		case 13:
+			rgb[0] = 9;
+			rgb[1] = 61;
+			rgb[2] = 0;
+			rgb[3] = 255;
+			break;
+		case 14:
+			rgb[0] = 11;
+			rgb[1] = 33;
+			rgb[2] = 7;
+			rgb[3] = 255;
+			break;
+		case 15:
+			rgb[0] = 196;
+			rgb[1] = 130;
+			rgb[2] = 49;
+			rgb[3] = 255;
+			break;
+		case 16:
+			rgb[0] = 125;
+			rgb[1] = 123;
+			rgb[2] = 120;
+			rgb[3] = 255;
+			break;
+		case 17:
+			rgb[0] = 50;
+			rgb[1] = 84;
+			rgb[2] = 47;
+			rgb[3] = 255;
+			break;
+		case 18:
+			rgb[0] = 85;
+			rgb[1] = 125;
+			rgb[2] = 81;
+			rgb[3] = 255;
+			break;
+		case 19:
+			rgb[0] = 238;
+			rgb[1] = 230;
+			rgb[2] = 255;
+			rgb[3] = 255;
+			break;
+		case 20:
+			rgb[0] = 222;
+			rgb[1] = 191;
+			rgb[2] = 255;
+			rgb[3] = 255;
+			break;
+		case 21:
+			rgb[0] = 255;
+			rgb[1] = 242;
+			rgb[2] = 207;
+			rgb[3] = 255;
+			break;
+		case 22:
+			rgb[0] = 212;
+			rgb[1] = 197;
+			rgb[2] = 159;
+			rgb[3] = 255;
+			break;
+		case 23:
+			rgb[0] = 35;
+			rgb[1] = 56;
+			rgb[2] = 31;
+			rgb[3] = 255;
+			break;
+	}
 }
 
 
