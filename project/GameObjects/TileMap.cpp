@@ -20,6 +20,11 @@ TileMap::~TileMap() {}
 
 bool TileMap::loadMap(sf::Vector2u tileSize, float scale)
 {
+	return this->loadMap(tileSize, 0, 0, 0, 0, scale);
+}
+
+bool TileMap::loadMap(sf::Vector2u tileSize, int R, int G, int B, int A, float scale)
+{
 	tileWidth = tileSize.x * scale;
 	tileHeight = tileSize.y * scale;
 
@@ -35,6 +40,11 @@ bool TileMap::loadMap(sf::Vector2u tileSize, float scale)
 			tile[1].position = sf::Vector2f((j + 1) * tileWidth, i * tileHeight);
 			tile[2].position = sf::Vector2f((j + 1) * tileWidth, (i + 1) * tileHeight);
 			tile[3].position = sf::Vector2f(j * tileWidth, (i + 1) * tileHeight);
+
+			tile[0].color = sf::Color(R, G, B, A);
+			tile[1].color = sf::Color(R, G, B, A);
+			tile[2].color = sf::Color(R, G, B, A);
+			tile[3].color = sf::Color(R, G, B, A);
 		}
 	}
 
@@ -84,6 +94,8 @@ bool TileMap::loadMap(sf::Vector2u tileSize, std::vector<int> map, float scale) 
 	mapArray = map;
 	return true;
 }
+
+
 
 bool TileMap::updateTile(sf::Vector2u tileSpace, int newVal) {
 

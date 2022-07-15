@@ -4,8 +4,10 @@
 These variables are modified by the GUI and will be taken in by the planet generator function
 *********************************************************************************************/
 
-unsigned int length_x;
-unsigned int length_y;
+//unsigned int length_x;
+//unsigned int length_y;
+
+//std::string seed;
 
 double land_cruncher;
 double island_cruncher;

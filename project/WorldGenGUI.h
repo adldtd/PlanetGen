@@ -23,6 +23,11 @@ public:
 
 private:
 
+	const int MAP_SCREEN_WIDTH = 368; //The space the map gets
+	const int MAP_SCREEN_HEIGHT = 184;
+	const int MAP_SCREEN_X = 0;
+	const int MAP_SCREEN_Y = 0;
+
 	std::thread t2;
 	std::mutex phone;
 
@@ -44,4 +49,5 @@ private:
 
 	void F_startGeneration();
 	void F_stopGeneration();
+	void F_manageNumInput(tgui::EditBox::Ptr box, bool forceInt = false, bool forceUnsigned = false); //Stops users from entering non-numerical input
 };
