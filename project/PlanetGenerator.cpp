@@ -56,10 +56,10 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 	double* moisture = new double[length];
 	double* climate = new double[length]; //Determines the climate type of each step
 
-	int stage = 0;
+	bool inProgress = true;
 	int progress = 0;
 
-	generateEarth(lengthX, lengthY, fileLocation, buffer, elevation, moisture, climate, stage, progress, seed);
+	generateEarth(lengthX, lengthY, fileLocation, buffer, elevation, moisture, climate, inProgress, progress, seed);
 
 	delete[] buffer;
 	delete[] elevation;
@@ -68,7 +68,8 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 }
 
 void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileLocation, char* buffer, double* elevation,
-				   double* moisture, double* climate, int &stage, int &progress, unsigned int seed, std::mutex* phone, bool useMutex) {
+				   double* moisture, double* climate, bool& inProgress, int &progress, unsigned int seed, std::mutex* phone, 
+				   bool useMutex) {
 
 	if (seed == 0) {
 		auto t = std::chrono::system_clock::now();
@@ -216,6 +217,11 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 
 
 			if (useMutex) phone->lock(); //Danger zone
+			if (!inProgress)
+			{
+				if (useMutex) phone->unlock(); //Abort
+				return;
+			}
 			buffer[index] = (char)output;
 			progress++;
 			if (useMutex) phone->unlock();
@@ -283,6 +289,15 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 			//heatValue += (heatModifier * 0.131579 * 0.2);
 			int index = c + (r * lengthX);
 			climate[index] = heatValue;
+
+
+			if (useMutex) phone->lock();
+			if (!inProgress)
+			{
+				if (useMutex) phone->unlock();
+				return;
+			}
+			if (useMutex) phone->unlock();
 		}
 	}
 
@@ -750,6 +765,11 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 
 
 			if (useMutex) phone->lock();
+			if (!inProgress)
+			{
+				if (useMutex) phone->unlock();
+				return;
+			}
 			buffer[index] = (char)output;
 			progress++;
 			if (useMutex) phone->unlock();
@@ -773,7 +793,7 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 	std::cout << "Complete" << std::endl;
 
 	if (useMutex) phone->lock();
-	stage++;
+	inProgress = false;
 	if (useMutex) phone->unlock();
 }
 

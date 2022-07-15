@@ -3,7 +3,7 @@
 #include <mutex>
 
 void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileLocation, char* buffer, double* elevation,
-				   double* moisture, double* climate, int& stage, int& progress, unsigned int seed = 0, std::mutex* phone = nullptr,
+				   double* moisture, double* climate, bool& inProgress, int& progress, unsigned int seed = 0, std::mutex* phone = nullptr,
 				   bool useMutex = false);
 
 void generateEarth(unsigned int chunksX, unsigned int chunksY, std::string fileLocation, unsigned int seed = 0); //Simpler, non-multithreaded function
