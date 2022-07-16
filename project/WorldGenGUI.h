@@ -20,6 +20,7 @@ public:
 	WorldGenGUI();
 	~WorldGenGUI();
 	void update(); //Called by main; mainly checks for updates retrieved from the generation function
+	void handleEvents(sf::Event event);
 
 private:
 
@@ -44,10 +45,14 @@ private:
 	int lastProgress;
 	bool inProgress; //Variable passed to the generation function; remains true unless execution has to be stopped
 
-	void initialize(); //Called by constructor; sets up all of the window widgets 
+	void initialize(); //Called by constructor; sets up all of the window widgets
+	void setGlobals(); //Retrieve the GUI variables, and set the globals to equal them
+
 	void fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths);
+	unsigned int transformSeed(std::string seed); //Converts a seed into a numerical value using a pseudorandom function
 
 	void F_startGeneration();
 	void F_stopGeneration();
 	void F_manageNumInput(tgui::EditBox::Ptr box, bool forceInt = false, bool forceUnsigned = false); //Stops users from entering non-numerical input
+	void F_scaleInput(tgui::EditBox::Ptr box, unsigned int limit); //Limits input to a certain amount of characters
 };
