@@ -1,5 +1,6 @@
 project/*.png
 project/*.sln
+project/*.ttf
 project/*.vcxproj
 project/*.filters
 project/*.user

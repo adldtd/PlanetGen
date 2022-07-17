@@ -8,8 +8,10 @@ namespace guivars
 {
 	unsigned int length_x;
 	unsigned int length_y;
+	bool loop_x;
+	bool loop_y;
 	unsigned int seed;
-
+	
 	double land_cruncher;
 	double island_cruncher;
 	double land_point;

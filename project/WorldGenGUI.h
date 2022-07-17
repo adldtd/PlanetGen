@@ -24,6 +24,8 @@ public:
 
 private:
 
+	tgui::Font mainFont; //To be used for all text
+
 	const int MAP_SCREEN_WIDTH = 368; //The space the map gets
 	const int MAP_SCREEN_HEIGHT = 184;
 	const int MAP_SCREEN_X = 0;

@@ -280,10 +280,7 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 				heatValue *= CLIMATECRUNCHER;
 			}
 			
-			if (USINGEQUATOR)
-				heatValue = normalizeToRange(-1, 1, RANGESTART + modify, RANGEEND + modify, heatValue);
-			else
-				heatValue = (heatValue * 0.5) + 0.5; //Normalize to range 0, 1
+			heatValue = normalizeToRange(-1, 1, RANGESTART + modify, RANGEEND + modify, heatValue);
 
 			//double heatModifier = clgen.noise2D(c / 550.0, r / 550.0) + clgen.octave2D(c / 550.0, r / 550.0, 3); //From about -1.52 to 1.52
 			//heatValue += (heatModifier * 0.131579 * 0.2);
