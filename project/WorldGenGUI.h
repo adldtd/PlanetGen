@@ -19,7 +19,7 @@ public:
 	void setTarget(sf::RenderWindow* w);
 
 	void update(); //Called by main; mainly checks for updates retrieved from the generation function
-	void handleEvents(sf::Event event);
+	void handleEvents(sf::Event& event);
 	void draw();
 
 private:
@@ -28,6 +28,8 @@ private:
 	TileMap map = TileMap(0u, 0u); //Represents the image of the world to be drawn
 	sf::RectangleShape background; //Image behind the GUI
 	sf::RectangleShape displayBackground; //Colored rectangle behind the world display
+
+	bool holdingF;
 
 	sf::RenderWindow* window;
 	tgui::Font mainFont; //To be used for all text

@@ -13,6 +13,8 @@ WorldGenGUI::WorldGenGUI(sf::RenderWindow* w)
 	displayBackground.setPosition(sf::Vector2f(0.f, 0.f));
 	displayBackground.setFillColor(sf::Color(0u, 0u, 0u, 255u));
 
+	holdingF = false;
+
 	progress = 0;
 	lastProgress = 0;
 	inProgress = false;
@@ -129,8 +131,33 @@ void WorldGenGUI::update()
 	phone.unlock();
 }
 
-void WorldGenGUI::handleEvents(sf::Event event)
+void WorldGenGUI::handleEvents(sf::Event& event)
 {
+	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F)
+	{
+		if (!holdingF)
+		{
+			map.setScale(sf::Vector2f(2.f, 2.f));
+			displayBackground.setScale(sf::Vector2f(2.f, 2.f));
+			gui.unfocusAllWidgets();
+			gui.get<tgui::Button>("startBtn")->onPress.setEnabled(false);
+			gui.get<tgui::Button>("cancelBtn")->onPress.setEnabled(false);
+			holdingF = true;
+		}
+	}
+	else if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::F)
+	{
+		if (holdingF)
+		{
+			map.setScale(sf::Vector2f(1.f, 1.f));
+			displayBackground.setScale(sf::Vector2f(1.f, 1.f));
+			gui.unfocusAllWidgets();
+			gui.get<tgui::Button>("startBtn")->onPress.setEnabled(true);
+			gui.get<tgui::Button>("cancelBtn")->onPress.setEnabled(true);
+			holdingF = false;
+		}
+	}
+
 	gui.handleEvent(event);
 }
 
@@ -139,7 +166,7 @@ void WorldGenGUI::draw()
 	window->draw(background);
 	window->draw(displayBackground);
 	window->draw(map);
-	gui.draw();
+	if (!holdingF) gui.draw();
 }
 
 
