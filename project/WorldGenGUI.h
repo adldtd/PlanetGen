@@ -14,16 +14,22 @@ class WorldGenGUI
 {
 public:
 
-	tgui::GuiSFML gui; //Both are public for easier window access
-	TileMap map = TileMap(0u, 0u); //Represents the image of the world to be drawn
-
-	WorldGenGUI();
+	WorldGenGUI(sf::RenderWindow* w);
 	~WorldGenGUI();
+	void setTarget(sf::RenderWindow* w);
+
 	void update(); //Called by main; mainly checks for updates retrieved from the generation function
 	void handleEvents(sf::Event event);
+	void draw();
 
 private:
 
+	tgui::GuiSFML gui; //Both are public for easier window access
+	TileMap map = TileMap(0u, 0u); //Represents the image of the world to be drawn
+	sf::RectangleShape background; //Image behind the GUI
+	sf::RectangleShape displayBackground; //Colored rectangle behind the world display
+
+	sf::RenderWindow* window;
 	tgui::Font mainFont; //To be used for all text
 
 	const int MAP_SCREEN_WIDTH = 368; //The space the map gets

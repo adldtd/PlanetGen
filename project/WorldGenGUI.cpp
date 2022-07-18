@@ -3,12 +3,21 @@
 #include <SFML/Graphics.hpp>
 #include "Globals.h"
 
-WorldGenGUI::WorldGenGUI()
+WorldGenGUI::WorldGenGUI(sf::RenderWindow* w)
 {
+	background.setSize(sf::Vector2f(736.f, 368.f));
+	background.setPosition(sf::Vector2f(0.f, 0.f));
+	background.setFillColor(sf::Color(194u, 194u, 194u, 255u));
+
+	displayBackground.setSize(sf::Vector2f(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT));
+	displayBackground.setPosition(sf::Vector2f(0.f, 0.f));
+	displayBackground.setFillColor(sf::Color(0u, 0u, 0u, 255u));
+
 	progress = 0;
 	lastProgress = 0;
 	inProgress = false;
 
+	this->setTarget(w);
 	initialize();
 }
 
@@ -22,6 +31,12 @@ WorldGenGUI::~WorldGenGUI()
 	if (climate != nullptr) delete[] climate;
 }
 
+void WorldGenGUI::setTarget(sf::RenderWindow* w)
+{
+	window = w;
+	gui.setTarget(*w);
+}
+
 
 
 /*********************************************************************************************
@@ -30,7 +45,6 @@ be used as input to the generation function
 *********************************************************************************************/
 void WorldGenGUI::setGlobals()
 {
-
 	length_x = gui.get<tgui::EditBox>("widthBox")->getText().toUInt(0u);
 	length_y = gui.get<tgui::EditBox>("heightBox")->getText().toUInt(0u);
 	loop_x = gui.get<tgui::ToggleButton>("loopXBtn")->isDown();
@@ -118,6 +132,14 @@ void WorldGenGUI::update()
 void WorldGenGUI::handleEvents(sf::Event event)
 {
 	gui.handleEvent(event);
+}
+
+void WorldGenGUI::draw()
+{
+	window->draw(background);
+	window->draw(displayBackground);
+	window->draw(map);
+	gui.draw();
 }
 
 
