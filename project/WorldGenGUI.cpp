@@ -13,7 +13,7 @@ WorldGenGUI::WorldGenGUI(sf::RenderWindow* w)
 	displayBackground.setPosition(sf::Vector2f(0.f, 0.f));
 	displayBackground.setFillColor(sf::Color(0u, 0u, 0u, 255u));
 
-	holdingF = false;
+	holdingF4 = false;
 
 	progress = 0;
 	lastProgress = 0;
@@ -51,7 +51,11 @@ void WorldGenGUI::setGlobals()
 	length_y = gui.get<tgui::EditBox>("heightBox")->getText().toUInt(0u);
 	loop_x = gui.get<tgui::ToggleButton>("loopXBtn")->isDown();
 	loop_y = gui.get<tgui::ToggleButton>("loopYBtn")->isDown();
-	seed = this->transformSeed(gui.get<tgui::EditBox>("seedBox")->getText().toStdString());
+
+	std::string s = gui.get<tgui::EditBox>("seedBox")->getText().toStdString();
+	if (s == "")
+		s = WorldGenGUI::randomSeed(19u);
+	seed = WorldGenGUI::transformSeed(s);
 
 	land_cruncher = gui.get<tgui::EditBox>("landCruncherBox")->getText().toFloat(1.f);
 	land_point = gui.get<tgui::EditBox>("landPointBox")->getText().toFloat(0.f);
@@ -76,6 +80,7 @@ void WorldGenGUI::setGlobals()
 
 	updateVarSafely("widthBox", tgui::String(length_x));
 	updateVarSafely("heightBox", tgui::String(length_y));
+	updateVarSafely("seedBox", s);
 
 	updateVarSafely("landCruncherBox", tgui::String(land_cruncher));
 	updateVarSafely("landPointBox", tgui::String(land_point));
@@ -133,28 +138,28 @@ void WorldGenGUI::update()
 
 void WorldGenGUI::handleEvents(sf::Event& event)
 {
-	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F)
+	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F4)
 	{
-		if (!holdingF)
+		if (!holdingF4)
 		{
 			map.setScale(sf::Vector2f(2.f, 2.f));
 			displayBackground.setScale(sf::Vector2f(2.f, 2.f));
 			gui.unfocusAllWidgets();
 			gui.get<tgui::Button>("startBtn")->onPress.setEnabled(false);
 			gui.get<tgui::Button>("cancelBtn")->onPress.setEnabled(false);
-			holdingF = true;
+			holdingF4 = true;
 		}
 	}
-	else if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::F)
+	else if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::F4)
 	{
-		if (holdingF)
+		if (holdingF4)
 		{
 			map.setScale(sf::Vector2f(1.f, 1.f));
 			displayBackground.setScale(sf::Vector2f(1.f, 1.f));
 			gui.unfocusAllWidgets();
 			gui.get<tgui::Button>("startBtn")->onPress.setEnabled(true);
 			gui.get<tgui::Button>("cancelBtn")->onPress.setEnabled(true);
-			holdingF = false;
+			holdingF4 = false;
 		}
 	}
 
@@ -166,7 +171,7 @@ void WorldGenGUI::draw()
 	window->draw(background);
 	window->draw(displayBackground);
 	window->draw(map);
-	if (!holdingF) gui.draw();
+	if (!holdingF4) gui.draw();
 }
 
 
@@ -179,18 +184,40 @@ unsigned int WorldGenGUI::transformSeed(std::string seed)
 {
 	unsigned int returnVal = 0u;
 	auto iter = seed.begin();
+	srand(0u);
 
 	while (iter != seed.end())
 	{
 		int charVal = static_cast<int>(*iter);
-		srand(charVal);
-		returnVal += (charVal % 7) * (charVal % 11) + (charVal % (rand() % 17));
+		returnVal += charVal + (rand() * rand());
+		srand(returnVal);
 		iter++;
 	}
 
 	std::cout << returnVal << std::endl;
 	return returnVal;
 }
+
+/*********************************************************************************************
+Returns a string filled with a number (defined as limit) of random characters
+*********************************************************************************************/
+std::string WorldGenGUI::randomSeed(unsigned int limit)
+{
+	std::string returnStr;
+
+	auto t = std::chrono::system_clock::now();
+	srand(t.time_since_epoch().count()); //Almost completely random
+
+	for (unsigned int c = 0; c < limit; c++)
+	{
+		int newc = (rand() % 94) + 33;
+		returnStr.push_back(static_cast<char>(newc)); //From '!' to '~'
+	}
+
+	return returnStr;
+}
+
+
 
 /*********************************************************************************************
 Fits a generated map to an enclosed display space

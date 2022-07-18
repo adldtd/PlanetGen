@@ -29,7 +29,7 @@ private:
 	sf::RectangleShape background; //Image behind the GUI
 	sf::RectangleShape displayBackground; //Colored rectangle behind the world display
 
-	bool holdingF;
+	bool holdingF4;
 
 	sf::RenderWindow* window;
 	tgui::Font mainFont; //To be used for all text
@@ -60,7 +60,9 @@ private:
 	void updateVarSafely(std::string varName, tgui::String newText);
 
 	void fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths);
-	unsigned int transformSeed(std::string seed); //Converts a seed into a numerical value using a pseudorandom function
+	
+	static unsigned int transformSeed(std::string seed); //Converts a seed into a numerical value using a pseudorandom function
+	static std::string randomSeed(unsigned int limit); //Returns a string filled with random characters
 
 	void F_startGeneration();
 	void F_stopGeneration();
