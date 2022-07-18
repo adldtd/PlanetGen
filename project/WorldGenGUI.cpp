@@ -30,16 +30,64 @@ be used as input to the generation function
 *********************************************************************************************/
 void WorldGenGUI::setGlobals()
 {
-	using namespace guivars;
 
-	auto WB = gui.get<tgui::EditBox>("widthBox");
-	length_x = WB->getText().toUInt(0u);
+	length_x = gui.get<tgui::EditBox>("widthBox")->getText().toUInt(0u);
+	length_y = gui.get<tgui::EditBox>("heightBox")->getText().toUInt(0u);
+	loop_x = gui.get<tgui::ToggleButton>("loopXBtn")->isDown();
+	loop_y = gui.get<tgui::ToggleButton>("loopYBtn")->isDown();
+	seed = this->transformSeed(gui.get<tgui::EditBox>("seedBox")->getText().toStdString());
 
-	auto HB = gui.get<tgui::EditBox>("heightBox");
-	length_y = HB->getText().toUInt(0u);
+	land_cruncher = gui.get<tgui::EditBox>("landCruncherBox")->getText().toFloat(1.f);
+	land_point = gui.get<tgui::EditBox>("landPointBox")->getText().toFloat(0.f);
+	sparsity = gui.get<tgui::EditBox>("landSparsityBox")->getText().toFloat(0.001f);
+	if (sparsity == 0.f) sparsity = 0.001f; //Will lead to a division by 0 error
 
-	auto SB = gui.get<tgui::EditBox>("seedBox");
-	seed = this->transformSeed(SB->getText().toStdString());
+	island_cruncher = gui.get<tgui::EditBox>("islandCruncherBox")->getText().toFloat(1.f);
+	i_point = gui.get<tgui::EditBox>("islandPointBox")->getText().toFloat(0.f);
+	i_sparsity = gui.get<tgui::EditBox>("islandSparsityBox")->getText().toFloat(0.001f);
+	if (i_sparsity == 0.f) i_sparsity = 0.001f;
+	i_punish = gui.get<tgui::EditBox>("islandPunishmentBox")->getText().toFloat(0.f);
+
+	climate_cruncher = gui.get<tgui::EditBox>("climateCruncherBox")->getText().toFloat(1.f);
+	range_start = gui.get<tgui::EditBox>("climateRangeStartBox")->getText().toFloat(0.f);
+	range_stop = gui.get<tgui::EditBox>("climateRangeStopBox")->getText().toFloat(1.f);
+	max_modify = gui.get<tgui::EditBox>("climateMaxModifyBox")->getText().toFloat(0.f);
+	using_equator = gui.get<tgui::ToggleButton>("useEquatorBtn")->isDown();
+
+	moisture_cruncher = gui.get<tgui::EditBox>("moistureCruncherBox")->getText().toFloat(1.f);
+	beach_point = gui.get<tgui::EditBox>("beachPointBox")->getText().toFloat(0.f);
+
+
+	updateVarSafely("widthBox", tgui::String(length_x));
+	updateVarSafely("heightBox", tgui::String(length_y));
+
+	updateVarSafely("landCruncherBox", tgui::String(land_cruncher));
+	updateVarSafely("landPointBox", tgui::String(land_point));
+	updateVarSafely("landSparsityBox", tgui::String(sparsity));
+
+	updateVarSafely("islandCruncherBox", tgui::String(island_cruncher));
+	updateVarSafely("islandPointBox", tgui::String(i_point));
+	updateVarSafely("islandSparsityBox", tgui::String(i_sparsity));
+	updateVarSafely("islandPunishmentBox", tgui::String(i_punish));
+
+	updateVarSafely("climateCruncherBox", tgui::String(climate_cruncher));
+	updateVarSafely("climateRangeStartBox", tgui::String(range_start));
+	updateVarSafely("climateRangeStopBox", tgui::String(range_stop));
+	updateVarSafely("climateMaxModifyBox", tgui::String(max_modify));
+
+	updateVarSafely("moistureCruncherBox", tgui::String(moisture_cruncher));
+	updateVarSafely("beachPointBox", tgui::String(beach_point));
+}
+
+/*********************************************************************************************
+Updates a single EditBox without a text change event
+*********************************************************************************************/
+void WorldGenGUI::updateVarSafely(std::string varName, tgui::String newText)
+{
+	auto w = gui.get<tgui::EditBox>(varName);
+	w->onTextChange.setEnabled(false);
+	w->setDefaultText(newText); w->setText(newText);
+	w->onTextChange.setEnabled(true);
 }
 
 
@@ -50,7 +98,7 @@ Called once every frame to check for and accommodate for changes
 void WorldGenGUI::update()
 {
 	phone.lock(); //Load pixels on tile map
-	if (inProgress) {
+	if (lastProgress < progress) {
 		while (lastProgress < progress) //******************************************** MAKE SURE LASTPROGRESS OR PROGRESS DO NOT OVERFLOW
 		{
 			lastProgress++;
@@ -62,7 +110,7 @@ void WorldGenGUI::update()
 			map.updateTile(sf::Vector2u(tileX, tileY), coloring[0], coloring[1], coloring[2], coloring[3]);
 		}
 
-		lastProgress--;
+		lastProgress--; //Quick fix for a bug where the program sometimes "skips" certain pixels
 	}
 	phone.unlock();
 }
@@ -147,8 +195,8 @@ void WorldGenGUI::F_startGeneration()
 
 	//lengthX = 1472u;
 	//lengthY = 736u;
-	lengthX = guivars::length_x;
-	lengthY = guivars::length_y;
+	lengthX = length_x;
+	lengthY = length_y;
 	length = lengthX * lengthY;
 
 	if (length == 0)
@@ -168,7 +216,7 @@ void WorldGenGUI::F_startGeneration()
 
 	auto gen = [this]()
 	{
-		generateEarth(lengthX, lengthY, "earth.bin", buffer, elevation, moisture, climate, inProgress, progress, guivars::seed, &phone, true);
+		generateEarth(lengthX, lengthY, "earth.bin", buffer, elevation, moisture, climate, inProgress, progress, seed, &phone, true);
 	};
 
 	t2 = std::thread(gen); //Automatically starts execution

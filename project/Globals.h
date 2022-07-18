@@ -4,28 +4,25 @@
 These variables are modified by the GUI and will be taken in by the planet generator function
 *********************************************************************************************/
 
-namespace guivars
-{
-	unsigned int length_x;
-	unsigned int length_y;
-	bool loop_x;
-	bool loop_y;
-	unsigned int seed;
+extern unsigned int length_x;
+extern unsigned int length_y;
+extern bool loop_x;
+extern bool loop_y;
+extern unsigned int seed;
 	
-	double land_cruncher;
-	double island_cruncher;
-	double land_point;
-	double sparsity;
-	double i_sparsity;
-	double i_point;
-	double i_punish;
+extern double land_cruncher;
+extern double island_cruncher;
+extern double land_point;
+extern double sparsity;
+extern double i_sparsity;
+extern double i_point;
+extern double i_punish;
 
-	bool using_equator;
-	double climate_cruncher;
-	double range_start;
-	double range_end;
-	double max_modify;
+extern bool using_equator;
+extern double climate_cruncher;
+extern double range_start;
+extern double range_stop;
+extern double max_modify;
 
-	double moisture_cruncher;
-	double beach_point;
-}
+extern double moisture_cruncher;
+extern double beach_point;

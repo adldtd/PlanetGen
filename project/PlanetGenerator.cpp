@@ -6,6 +6,7 @@
 #include <mutex>
 #include "PerlinNoise.hpp"
 #include "PlanetGenerator.h"
+#include "Globals.h"
 
 
 /*
@@ -78,9 +79,6 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 	else
 		srand(seed);
 
-	bool polarX = false;
-	bool polarY = false;
-
 	siv::PerlinNoise::seed_type continentSeed = rand();
 	siv::PerlinNoise::seed_type islandSeed = rand();
 	siv::PerlinNoise::seed_type moistureSeed = rand();
@@ -94,26 +92,28 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 	earthFile.seekp(0);
 
 	unsigned int length = lengthX * lengthY;
+	bool polarX = loop_x;
+	bool polarY = loop_y;
 
 	//Continent variables
-	double LANDCRUNCHER = 1.0; //Larger means beefier continents
-	double ISLANDCRUNCHER = 1.0; //Larger means beefier islands
-	double LANDPOINT = 0.30; //Same effect as increasing landcruncher
-	double SPARSITY = 350.0; //This value works best at lengths 1472u 736u; larger means more space between land and sea
-	double ISPARSITY = SPARSITY / 7.0; //Sparsity, but for islands
-	double IPOINT = -0.01; //The point at which an island is most likely to spawn; farther from landpoint means farther from land
-	double IPUNISH = 12.5; //Larger means the island will become more submerged the farther it gets from IPOINT
+	double LANDCRUNCHER = land_cruncher; //Larger means beefier continents
+	double ISLANDCRUNCHER = island_cruncher; //Larger means beefier islands
+	double LANDPOINT = land_point; //Same effect as increasing landcruncher
+	double SPARSITY = sparsity; //This value works best at lengths 1472u 736u; larger means more space between land and sea
+	double ISPARSITY = i_sparsity; //Sparsity, but for islands
+	double IPOINT = i_point; //The point at which an island is most likely to spawn; farther from landpoint means farther from land
+	double IPUNISH = i_punish; //Larger means the island will become more submerged the farther it gets from IPOINT;
 
 	//Climate variables
-	bool USINGEQUATOR = true;
-	double CLIMATECRUNCHER = 1.0; //Larger means the climate will be more "extreme"
-	double RANGESTART = 0; //The wider the range of these two variables, the more "smooth" equator heat generation will be
-	double RANGEEND = 0.45;
-	double MAXMODIFY = 1 - RANGEEND; //The largest value that will be added to the range; the larger it is the more "hotter" the equator will be
+	bool USINGEQUATOR = using_equator;
+	double CLIMATECRUNCHER = climate_cruncher; //Larger means the climate will be more "extreme"
+	double RANGESTART = range_start; //The wider the range of these two variables, the more "smooth" equator heat generation will be
+	double RANGEEND = range_stop;
+	double MAXMODIFY = max_modify; //The largest value that will be added to the range; the larger it is the more "hotter" the equator will be
 
 	//Biome variables
-	double MOISTURECRUNCHER = 1.0;
-	double BEACHPOINT = 0.32; //Larger means more and more land will be a beach biome
+	double MOISTURECRUNCHER = moisture_cruncher;
+	double BEACHPOINT = beach_point; //Larger means more and more land will be a beach biome
 
 	const double TWOPI = 6.2832;
 	double angleRadiusX = (1.0 / SPARSITY) / (TWOPI / double(lengthX));

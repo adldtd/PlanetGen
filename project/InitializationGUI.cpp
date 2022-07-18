@@ -13,6 +13,7 @@ void WorldGenGUI::initialize()
 	map = TileMap(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT);
 	this->fitToSpace(sf::Vector2f(MAP_SCREEN_X, MAP_SCREEN_Y), sf::Vector2f(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT)); //Start with a map at the maximum screen size
 
+	//********************************************************************************************* GENERATION GUI GROUP
 
 	tgui::Button::Ptr startBtn = tgui::Button::create("Generate");
 	startBtn->setTextSize(19u);
@@ -26,6 +27,7 @@ void WorldGenGUI::initialize()
 	cancelBtn->setPosition(135.f, 200.f);
 	cancelBtn->onPress([this]() { this->F_stopGeneration(); });
 
+	//********************************************************************************************* WORLD META GUI GROUP
 
 	tgui::EditBox::Ptr worldArea = tgui::EditBox::create();
 	worldArea->setReadOnly();
@@ -33,6 +35,30 @@ void WorldGenGUI::initialize()
 	worldArea->setPosition(375.f, 2.f);
 	worldArea->setText("World");
 	worldArea->setTextSize(9u);
+
+	tgui::EditBox::Ptr loopXArea = tgui::EditBox::create();
+	loopXArea->setReadOnly();
+	loopXArea->setSize(70.f, 16.f);
+	loopXArea->setPosition(519.f, 2.f);
+	loopXArea->setText("Hori. Loop");
+	loopXArea->setTextSize(9u);
+	loopXArea->setAlignment(tgui::EditBox::Alignment::Center);
+
+	tgui::ToggleButton::Ptr loopXBtn = tgui::ToggleButton::create();
+	loopXBtn->setSize(16.f, 16.f);
+	loopXBtn->setPosition(504.f, 2.f);
+
+	tgui::EditBox::Ptr loopYArea = tgui::EditBox::create();
+	loopYArea->setReadOnly();
+	loopYArea->setSize(70.f, 16.f);
+	loopYArea->setPosition(620.f, 2.f);
+	loopYArea->setText("Verti. Loop");
+	loopYArea->setTextSize(9u);
+	loopYArea->setAlignment(tgui::EditBox::Alignment::Center);
+
+	tgui::ToggleButton::Ptr loopYBtn = tgui::ToggleButton::create();
+	loopYBtn->setSize(16.f, 16.f);
+	loopYBtn->setPosition(605.f, 2.f);
 
 	tgui::EditBox::Ptr widthArea = tgui::EditBox::create();
 	widthArea->setReadOnly();
@@ -50,7 +76,7 @@ void WorldGenGUI::initialize()
 	widthBox->onTextChange([this]() {
 		auto WB = gui.get<tgui::EditBox>("widthBox");
 		this->F_manageNumInput(WB, true, true);
-		});
+	});
 
 	tgui::EditBox::Ptr heightArea = tgui::EditBox::create();
 	heightArea->setReadOnly();
@@ -68,7 +94,7 @@ void WorldGenGUI::initialize()
 	heightBox->onTextChange([this]() {
 		auto HB = gui.get<tgui::EditBox>("heightBox");
 		this->F_manageNumInput(HB, true, true);
-		});
+	});
 
 	tgui::EditBox::Ptr seedArea = tgui::EditBox::create();
 	seedArea->setReadOnly();
@@ -85,8 +111,9 @@ void WorldGenGUI::initialize()
 	seedBox->onTextChange([this]() {
 		auto SB = gui.get<tgui::EditBox>("seedBox");
 		this->F_scaleInput(SB, 19);
-		});
+	});
 
+	//********************************************************************************************* CONTINENTAL GUI GROUP
 
 	tgui::EditBox::Ptr continentalArea = tgui::EditBox::create(); //Distance of 35.f
 	continentalArea->setReadOnly();
@@ -113,7 +140,7 @@ void WorldGenGUI::initialize()
 	landCruncherBox->onTextChange([this]() {
 		auto w = gui.get<tgui::EditBox>("landCruncherBox");
 		this->F_manageNumInput(w, false, true);
-		});
+	});
 
 	tgui::EditBox::Ptr landPointArea = tgui::EditBox::create();
 	landPointArea->setReadOnly();
@@ -131,7 +158,7 @@ void WorldGenGUI::initialize()
 	landPointBox->onTextChange([this]() {
 		auto w = gui.get<tgui::EditBox>("landPointBox");
 		this->F_manageNumInput(w, false, false);
-		});
+	});
 
 	tgui::EditBox::Ptr landSparsityArea = tgui::EditBox::create();
 	landSparsityArea->setReadOnly();
@@ -149,8 +176,9 @@ void WorldGenGUI::initialize()
 	landSparsityBox->onTextChange([this]() {
 		auto w = gui.get<tgui::EditBox>("landSparsityBox");
 		this->F_manageNumInput(w, false, true);
-		});
+	});
 
+	//********************************************************************************************* ISLAND GUI GROUP
 
 	tgui::EditBox::Ptr islandArea = tgui::EditBox::create(); //Distance of 35.f
 	islandArea->setReadOnly();
@@ -175,7 +203,7 @@ void WorldGenGUI::initialize()
 	islandCruncherBox->onTextChange([this]() {
 		auto w = gui.get<tgui::EditBox>("islandCruncherBox");
 		this->F_manageNumInput(w, false, true);
-		});
+	});
 
 	tgui::EditBox::Ptr islandPointArea = tgui::EditBox::create();
 	islandPointArea->setReadOnly();
@@ -193,7 +221,7 @@ void WorldGenGUI::initialize()
 	islandPointBox->onTextChange([this]() {
 		auto w = gui.get<tgui::EditBox>("islandPointBox");
 		this->F_manageNumInput(w, false, false);
-		});
+	});
 
 	tgui::EditBox::Ptr islandSparsityArea = tgui::EditBox::create();
 	islandSparsityArea->setReadOnly();
@@ -211,7 +239,7 @@ void WorldGenGUI::initialize()
 	islandSparsityBox->onTextChange([this]() {
 		auto w = gui.get<tgui::EditBox>("islandSparsityBox");
 		this->F_manageNumInput(w, false, true);
-		});
+	});
 
 	tgui::EditBox::Ptr islandPunishmentArea = tgui::EditBox::create();
 	islandPunishmentArea->setReadOnly();
@@ -229,8 +257,9 @@ void WorldGenGUI::initialize()
 	islandPunishmentBox->onTextChange([this]() {
 		auto w = gui.get<tgui::EditBox>("islandPunishmentBox");
 		this->F_manageNumInput(w, false, false);
-		});
+	});
 
+	//********************************************************************************************* CLIMATE GUI GROUP
 
 	tgui::EditBox::Ptr climateArea = tgui::EditBox::create(); //Distance of 35.f
 	climateArea->setReadOnly();
@@ -250,6 +279,12 @@ void WorldGenGUI::initialize()
 	tgui::ToggleButton::Ptr useEquatorBtn = tgui::ToggleButton::create();
 	useEquatorBtn->setSize(16.f, 16.f);
 	useEquatorBtn->setPosition(605.f, 221.f);
+	useEquatorBtn->onClick([this]() {
+		auto w = gui.get<tgui::ToggleButton>("useEquatorBtn");
+		auto w1 = gui.get<tgui::EditBox>("climateMaxModifyBox");
+		auto w2 = gui.get<tgui::EditBox>("climateMaxModifyArea");
+		w1->setEnabled(w->isDown()); w2->setEnabled(w->isDown());
+	});
 
 	tgui::EditBox::Ptr climateCruncherArea = tgui::EditBox::create(); //Distance of 21.f
 	climateCruncherArea->setReadOnly();
@@ -267,7 +302,7 @@ void WorldGenGUI::initialize()
 	climateCruncherBox->onTextChange([this]() {
 		auto w = gui.get<tgui::EditBox>("climateCruncherBox");
 		this->F_manageNumInput(w, false, true);
-		});
+	});
 
 	tgui::EditBox::Ptr climateRangeStartArea = tgui::EditBox::create();
 	climateRangeStartArea->setReadOnly();
@@ -285,7 +320,7 @@ void WorldGenGUI::initialize()
 	climateRangeStartBox->onTextChange([this]() {
 		auto w = gui.get<tgui::EditBox>("climateRangeStartBox");
 		this->F_manageNumInput(w, false, false);
-		});
+	});
 
 	tgui::EditBox::Ptr climateRangeStopArea = tgui::EditBox::create();
 	climateRangeStopArea->setReadOnly();
@@ -303,7 +338,7 @@ void WorldGenGUI::initialize()
 	climateRangeStopBox->onTextChange([this]() {
 		auto w = gui.get<tgui::EditBox>("climateRangeStopBox");
 		this->F_manageNumInput(w, false, false);
-		});
+	});
 
 	tgui::EditBox::Ptr climateMaxModifyArea = tgui::EditBox::create();
 	climateMaxModifyArea->setReadOnly();
@@ -312,6 +347,7 @@ void WorldGenGUI::initialize()
 	climateMaxModifyArea->setText("Max Change");
 	climateMaxModifyArea->setTextSize(9u);
 	climateMaxModifyArea->setAlignment(tgui::EditBox::Alignment::Center);
+	climateMaxModifyArea->setEnabled(false);
 
 	tgui::EditBox::Ptr climateMaxModifyBox = tgui::EditBox::create();
 	climateMaxModifyBox->setSize(70.f, 25.f);
@@ -321,8 +357,10 @@ void WorldGenGUI::initialize()
 	climateMaxModifyBox->onTextChange([this]() {
 		auto w = gui.get<tgui::EditBox>("climateMaxModifyBox");
 		this->F_manageNumInput(w, false, true);
-		});
+	});
+	climateMaxModifyBox->setEnabled(false);
 
+	//********************************************************************************************* MOISTURE GUI GROUP
 
 	tgui::EditBox::Ptr moistureArea = tgui::EditBox::create(); //Distance of 35.f
 	moistureArea->setReadOnly();
@@ -347,7 +385,7 @@ void WorldGenGUI::initialize()
 	moistureCruncherBox->onTextChange([this]() {
 		auto w = gui.get<tgui::EditBox>("moistureCruncherBox");
 		this->F_manageNumInput(w, false, true);
-		});
+	});
 
 	tgui::EditBox::Ptr beachPointArea = tgui::EditBox::create();
 	beachPointArea->setReadOnly();
@@ -365,13 +403,18 @@ void WorldGenGUI::initialize()
 	beachPointBox->onTextChange([this]() {
 		auto w = gui.get<tgui::EditBox>("beachPointBox");
 		this->F_manageNumInput(w, false, true);
-		});
+	});
 
+	//********************************************************************************************* GUI CONSTRUCTION
 
 	gui.add(startBtn, "startBtn");
 	gui.add(cancelBtn, "cancelBtn");
 
 	gui.add(worldArea, "worldArea");
+	gui.add(loopXArea, "loopXArea");
+	gui.add(loopXBtn, "loopXBtn");
+	gui.add(loopYArea, "loopYArea");
+	gui.add(loopYBtn, "loopYBtn");
 	gui.add(widthArea, "widthArea");
 	gui.add(widthBox, "widthBox");
 	gui.add(heightArea, "heightArea");

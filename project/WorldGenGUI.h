@@ -49,6 +49,7 @@ private:
 
 	void initialize(); //Called by constructor; sets up all of the window widgets
 	void setGlobals(); //Retrieve the GUI variables, and set the globals to equal them
+	void updateVarSafely(std::string varName, tgui::String newText);
 
 	void fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths);
 	unsigned int transformSeed(std::string seed); //Converts a seed into a numerical value using a pseudorandom function
