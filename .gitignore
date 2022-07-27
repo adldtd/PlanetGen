@@ -7,5 +7,4 @@ project/*.user
 project/todo.txt
 project/Debug/
 project/.vs/
-project/PerlinNoise.hpp
 project/earth.bin
