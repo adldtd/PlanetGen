@@ -2,6 +2,7 @@
 #include <TGUI/TGUI.hpp>
 #include <SFML/Graphics.hpp>
 #include "Globals.h"
+#include <climits>
 
 WorldGenGUI::WorldGenGUI(sf::RenderWindow* w)
 {
@@ -49,6 +50,19 @@ void WorldGenGUI::setGlobals()
 {
 	length_x = gui.get<tgui::EditBox>("widthBox")->getText().toUInt(0u);
 	length_y = gui.get<tgui::EditBox>("heightBox")->getText().toUInt(0u);
+
+	if (length_x != 0u) {
+		unsigned int res = UINT_MAX / 4u; //length_x and length_y are passed into TileMap, which has to create 4 vertices for each tile
+		if (res < length_x)
+			length_x = res;
+	}
+
+	unsigned int res = 0u;
+	if (length_x != 0u)
+		res = UINT_MAX / (length_x * 4);
+	if (res < length_y) //Checks for possible uint overflow during multiplication
+		length_y = res;
+
 	loop_x = gui.get<tgui::ToggleButton>("loopXBtn")->isDown();
 	loop_y = gui.get<tgui::ToggleButton>("loopYBtn")->isDown();
 
@@ -143,6 +157,10 @@ void WorldGenGUI::handleEvents(sf::Event& event)
 		if (!holdingF4)
 		{
 			map.setScale(sf::Vector2f(2.f, 2.f));
+			sf::Vector2f nextPos = map.getPosition();
+			nextPos.x *= 2.0; nextPos.y *= 2.0;
+			map.setPosition(nextPos);
+
 			displayBackground.setScale(sf::Vector2f(2.f, 2.f));
 			gui.unfocusAllWidgets();
 			gui.get<tgui::Button>("startBtn")->onPress.setEnabled(false);
@@ -155,6 +173,10 @@ void WorldGenGUI::handleEvents(sf::Event& event)
 		if (holdingF4)
 		{
 			map.setScale(sf::Vector2f(1.f, 1.f));
+			sf::Vector2f nextPos = map.getPosition();
+			nextPos.x *= 0.5; nextPos.y *= 0.5;
+			map.setPosition(nextPos);
+
 			displayBackground.setScale(sf::Vector2f(1.f, 1.f));
 			gui.unfocusAllWidgets();
 			gui.get<tgui::Button>("startBtn")->onPress.setEnabled(true);
@@ -262,15 +284,29 @@ void WorldGenGUI::F_startGeneration()
 {
 	this->F_stopGeneration();
 
-	if (buffer != nullptr) delete[] buffer; //Reset for new lengths
-	if (elevation != nullptr) delete[] elevation;
-	if (moisture != nullptr) delete[] moisture;
-	if (climate != nullptr) delete[] climate;
+	if (buffer != nullptr) //Reset for new lengths
+	{ 
+		delete[] buffer;
+		buffer = nullptr;
+	}
+	if (elevation != nullptr)
+	{
+		delete[] elevation;
+		elevation = nullptr;
+	}
+	if (moisture != nullptr)
+	{
+		delete[] moisture;
+		moisture = nullptr;
+	}
+	if (climate != nullptr)
+	{
+		delete[] climate;
+		climate = nullptr;
+	}
 
 	this->setGlobals(); //Retrieve all information entered into the GUI
 
-	//lengthX = 1472u;
-	//lengthY = 736u;
 	lengthX = length_x;
 	lengthY = length_y;
 	length = lengthX * lengthY;
@@ -279,7 +315,15 @@ void WorldGenGUI::F_startGeneration()
 		return;
 
 	map = TileMap(lengthX, lengthY);
+	if (map.getHeight() == 0u || map.getWidth() == 0u)
+	{
+		std::cout << "Failed to create TileMap object" << std::endl;
+		lastProgress = progress;
+		return;
+	}
+
 	this->fitToSpace(sf::Vector2f(MAP_SCREEN_X, MAP_SCREEN_Y), sf::Vector2f(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT)); //This function loads the map
+
 
 	buffer = new char[length];
 	elevation = new double[length];

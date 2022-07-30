@@ -16,7 +16,7 @@ int main()
 		while (window.pollEvent(event))
 		{
 			wgui.handleEvents(event);
-
+			
 			if (event.type == sf::Event::Closed)
 				window.close();
 		}

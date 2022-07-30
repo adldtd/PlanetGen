@@ -5,10 +5,34 @@
 
 TileMap::TileMap(unsigned int w, unsigned int h) {
 	obj.setPrimitiveType(sf::Quads);
-	obj.resize(w * h * 4);
+	bool failed = false;
 
-	width = w;
-	height = h;
+	try
+	{
+		obj.resize(w * h * 4);
+	}
+	catch (std::length_error e)
+	{
+		std::cout << "Invalid size for VectorArray inside TileMap object" << std::endl;
+		failed = true;
+	}
+	catch (std::bad_alloc e)
+	{
+		std::cout << "Could not allocate enough memory for a VectorArray inside TileMap object" << std::endl;
+		failed = true;
+	}
+
+	if (!failed)
+	{
+		width = w;
+		height = h;
+	}
+	else
+	{
+		width = 0u; //Failsafe for when SFML cannot create the TileMap
+		height = 0u;
+	}
+
 	tileWidth = 0.f; //Later initialized when a map is loaded
 	tileHeight = 0.f;
 	texturePixelWidth = 0;
