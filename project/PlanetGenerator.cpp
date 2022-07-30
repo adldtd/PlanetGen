@@ -49,25 +49,6 @@
 */
 
 
-void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileLocation, unsigned int seed)
-{
-	unsigned int length = lengthX * lengthY;
-	char* buffer = new char[length];
-	double* elevation = new double[length]; //Records the elevation of each step
-	double* moisture = new double[length];
-	double* climate = new double[length]; //Determines the climate type of each step
-
-	bool inProgress = true;
-	int progress = 0;
-
-	generateEarth(lengthX, lengthY, fileLocation, buffer, elevation, moisture, climate, inProgress, progress, seed);
-
-	delete[] buffer;
-	delete[] elevation;
-	delete[] moisture;
-	delete[] climate;
-}
-
 void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileLocation, char* buffer, double* elevation,
 				   double* moisture, double* climate, bool& inProgress, int &progress, unsigned int seed, std::mutex* phone, 
 				   bool useMutex)

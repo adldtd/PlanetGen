@@ -27,11 +27,7 @@ WorldGenGUI::WorldGenGUI(sf::RenderWindow* w)
 WorldGenGUI::~WorldGenGUI()
 {
 	this->F_stopGeneration();
-
-	if (buffer != nullptr) delete[] buffer;
-	if (elevation != nullptr) delete[] elevation;
-	if (moisture != nullptr) delete[] moisture;
-	if (climate != nullptr) delete[] climate;
+	this->free_values();
 }
 
 void WorldGenGUI::setTarget(sf::RenderWindow* w)
@@ -52,7 +48,7 @@ void WorldGenGUI::setGlobals()
 	length_y = gui.get<tgui::EditBox>("heightBox")->getText().toUInt(0u);
 
 	if (length_x != 0u) {
-		unsigned int res = UINT_MAX / 4u; //length_x and length_y are passed into TileMap, which has to create 4 vertices for each tile
+		unsigned int res = UINT_MAX / 4u; //length_x and length_y are passed into ImageMap, which has to create 4 vertices for each tile
 		if (res < length_x)
 			length_x = res;
 	}
@@ -276,16 +272,31 @@ void WorldGenGUI::fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths)
 
 
 
-/*********************************************************************************************
-Stops any currently running threads, performs memory management, and begins a new thread
-with the generation function
-*********************************************************************************************/
-void WorldGenGUI::F_startGeneration()
+bool WorldGenGUI::malloc_values()
 {
-	this->F_stopGeneration();
+	bool returnVal = true;
 
-	if (buffer != nullptr) //Reset for new lengths
-	{ 
+	try
+	{
+		buffer = new char[length];
+		elevation = new double[length];
+		moisture = new double[length];
+		climate = new double[length];
+	}
+	catch (std::bad_alloc& e)
+	{
+		std::cout << "Could not allocate enough memory for the map data: " << e.what() << std::endl;
+		this->free_values();
+		returnVal = false;
+	}
+
+	return returnVal;
+}
+
+void WorldGenGUI::free_values()
+{
+	if (buffer != nullptr)
+	{
 		delete[] buffer;
 		buffer = nullptr;
 	}
@@ -304,6 +315,18 @@ void WorldGenGUI::F_startGeneration()
 		delete[] climate;
 		climate = nullptr;
 	}
+}
+
+
+
+/*********************************************************************************************
+Stops any currently running threads, performs memory management, and begins a new thread
+with the generation function
+*********************************************************************************************/
+void WorldGenGUI::F_startGeneration()
+{
+	this->F_stopGeneration();
+	this->free_values(); //Reset for new lengths
 
 	this->setGlobals(); //Retrieve all information entered into the GUI
 
@@ -314,21 +337,20 @@ void WorldGenGUI::F_startGeneration()
 	if (length == 0)
 		return;
 
-	map = TileMap(lengthX, lengthY);
+	map = ImageMap(lengthX, lengthY);
 	if (map.getHeight() == 0u || map.getWidth() == 0u)
 	{
-		std::cout << "Failed to create TileMap object" << std::endl;
 		lastProgress = progress;
 		return;
 	}
+	map.fitToSpace(sf::Vector2f(MAP_SCREEN_X, MAP_SCREEN_Y), sf::Vector2f(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT), 0, 0, 130, 255); //This function loads the map
 
-	this->fitToSpace(sf::Vector2f(MAP_SCREEN_X, MAP_SCREEN_Y), sf::Vector2f(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT)); //This function loads the map
 
-
-	buffer = new char[length];
-	elevation = new double[length];
-	moisture = new double[length];
-	climate = new double[length];
+	if (!this->malloc_values())
+	{
+		lastProgress = progress;
+		return;
+	}
 
 	progress = 0;
 	lastProgress = 0;

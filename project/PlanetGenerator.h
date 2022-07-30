@@ -6,7 +6,6 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 				   double* moisture, double* climate, bool& inProgress, int& progress, unsigned int seed = 0, std::mutex* phone = nullptr,
 				   bool useMutex = false);
 
-void generateEarth(unsigned int chunksX, unsigned int chunksY, std::string fileLocation, unsigned int seed = 0); //Simpler, non-multithreaded function
 double normalFunction(double x, double mean = 0.0, double deviation = 1.0);
 double normalizeToRange(double ix1, double ix2, double tx1, double tx2, double i);
 void returnRGBA(int val, int* rgb); //Takes in and modifies a size 4 int array representing a color

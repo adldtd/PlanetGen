@@ -10,7 +10,7 @@ void WorldGenGUI::initialize()
 	mainFont = tgui::Font("consola.ttf");
 	gui.setFont(mainFont);
 
-	map = TileMap(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT);
+	map = ImageMap(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT);
 	this->fitToSpace(sf::Vector2f(MAP_SCREEN_X, MAP_SCREEN_Y), sf::Vector2f(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT)); //Start with a map at the maximum screen size
 
 	//********************************************************************************************* GENERATION GUI GROUP

@@ -1,6 +1,6 @@
 #pragma once
 #include "PlanetGenerator.h"
-#include "GameObjects/TileMap.h"
+#include "GameObjects/ImageMap.h"
 #include <thread>
 #include <TGUI/TGUI.hpp>
 #include <mutex>
@@ -25,7 +25,7 @@ public:
 private:
 
 	tgui::GuiSFML gui; //Both are public for easier window access
-	TileMap map = TileMap(0u, 0u); //Represents the image of the world to be drawn
+	ImageMap map = ImageMap(0u, 0u); //Represents the image of the world to be drawn
 	sf::RectangleShape background; //Image behind the GUI
 	sf::RectangleShape displayBackground; //Colored rectangle behind the world display
 
@@ -58,6 +58,9 @@ private:
 	void initialize(); //Called by constructor; sets up all of the window widgets
 	void setGlobals(); //Retrieve the GUI variables, and set the globals to equal them
 	void updateVarSafely(std::string varName, tgui::String newText);
+
+	bool malloc_values(); //Instantiate buffer, elevation, moisture, and climate
+	void free_values(); //Delete those values; free memory up
 
 	void fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths);
 	
