@@ -12,6 +12,7 @@ class ImageMap : public Entity
 public:
 
 	ImageMap(unsigned int width, unsigned int height);
+	bool reform(unsigned int width, unsigned int height); //Resizes the VertexArray
 
 	bool loadMap(sf::Vector2u tileSize, float scale = 1.0, bool scuff = false);
 	bool loadMap(sf::Vector2u tileSize, int R, int G, int B, int A, float scale = 1.0, bool scuff = false); //Loads a specific color for all spaces
@@ -35,4 +36,12 @@ protected:
 
 	bool scuffed; //"Scuffed" mode indicates whether the VertexArray is simply scaled, or completely recreated when scale() is called
 	float scale = 0.f;
+
+private:
+
+	unsigned int originalWidth; //Keep track of the unscaled widths and heights that were entered
+	unsigned int originalHeight;
+
+	float originalTileWidth;
+	float originalTileHeight;
 };

@@ -43,9 +43,9 @@ private:
 	std::mutex phone;
 
 	char* buffer = nullptr; //Have to be memory-managed throughout the class and widget functions
-	double* elevation = nullptr;
-	double* moisture = nullptr;
-	double* climate = nullptr;
+	float* elevation = nullptr;
+	float* moisture = nullptr;
+	float* climate = nullptr;
 
 	unsigned int lengthX;
 	unsigned int lengthY;

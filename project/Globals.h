@@ -10,19 +10,19 @@ extern bool loop_x;
 extern bool loop_y;
 extern unsigned int seed;
 	
-extern double land_cruncher;
-extern double island_cruncher;
-extern double land_point;
-extern double sparsity;
-extern double i_sparsity;
-extern double i_point;
-extern double i_punish;
+extern float land_cruncher;
+extern float island_cruncher;
+extern float land_point;
+extern float sparsity;
+extern float i_sparsity;
+extern float i_point;
+extern float i_punish;
 
 extern bool using_equator;
-extern double climate_cruncher;
-extern double range_start;
-extern double range_stop;
-extern double max_modify;
+extern float climate_cruncher;
+extern float range_start;
+extern float range_stop;
+extern float max_modify;
 
-extern double moisture_cruncher;
-extern double beach_point;
+extern float moisture_cruncher;
+extern float beach_point;

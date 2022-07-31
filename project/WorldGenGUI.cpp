@@ -157,7 +157,7 @@ void WorldGenGUI::handleEvents(sf::Event& event)
 		if (!holdingF4)
 		{
 			displayBackground.setScale(sf::Vector2f(2.f, 2.f));
-			map = ImageMap(lengthX, lengthY); //**************************************FOR ONE FRAME, THIS IS TOO EXPENSIVE!!!!!!!!!!!!!!!
+			//map = ImageMap(lengthX, lengthY); //**************************************FOR ONE FRAME, THIS IS TOO EXPENSIVE!!!!!!!!!
 			map.fitToSpace(sf::Vector2f(MAP_SCREEN_X, MAP_SCREEN_Y), sf::Vector2f(MAP_SCREEN_WIDTH * 2.f, MAP_SCREEN_HEIGHT * 2.f), 0, 0, 130, 255, true);
 			lastProgress = 0; //Redraw everything
 
@@ -172,7 +172,7 @@ void WorldGenGUI::handleEvents(sf::Event& event)
 		if (holdingF4)
 		{
 			displayBackground.setScale(sf::Vector2f(1.f, 1.f));
-			map = ImageMap(lengthX, lengthY);
+			//map = ImageMap(lengthX, lengthY);
 			map.fitToSpace(sf::Vector2f(MAP_SCREEN_X, MAP_SCREEN_Y), sf::Vector2f(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT), 0, 0, 130, 255, true);
 			lastProgress = 0;
 
@@ -246,9 +246,9 @@ bool WorldGenGUI::malloc_values()
 	try
 	{
 		buffer = new char[length];
-		elevation = new double[length];
-		moisture = new double[length];
-		climate = new double[length];
+		elevation = new float[length];
+		moisture = new float[length];
+		climate = new float[length];
 	}
 	catch (std::bad_alloc& e)
 	{

@@ -5,7 +5,19 @@
 
 ImageMap::ImageMap(unsigned int w, unsigned int h)
 {
+	originalWidth = w; //Can only be changed by the constructor
+	originalHeight = h;
+
 	obj.setPrimitiveType(sf::Quads);
+	this->reform(w, h);
+
+	tileWidth = 0.f; //Later initialized when a map is loaded
+	tileHeight = 0.f;
+	scuffed = false;
+}
+
+bool ImageMap::reform(unsigned int w, unsigned int h)
+{
 	bool failed = false;
 
 	try
@@ -34,8 +46,7 @@ ImageMap::ImageMap(unsigned int w, unsigned int h)
 		height = 0u;
 	}
 
-	tileWidth = 0.f; //Later initialized when a map is loaded
-	tileHeight = 0.f;
+	return !failed;
 }
 
 
@@ -47,6 +58,9 @@ bool ImageMap::loadMap(sf::Vector2u tileSize, float scale, bool scuff)
 
 bool ImageMap::loadMap(sf::Vector2u tileSize, int R, int G, int B, int A, float s, bool scuff)
 {
+	originalTileWidth = tileSize.x;
+	originalTileHeight = tileSize.y;
+
 	if (!scuff)
 	{
 		tileWidth = tileSize.x * s;
@@ -58,6 +72,9 @@ bool ImageMap::loadMap(sf::Vector2u tileSize, int R, int G, int B, int A, float 
 		float newHeight = height * s;
 		width = floor(newWidth);
 		height = floor(newHeight);
+
+		if (!this->reform(width, height))
+			return false;
 
 		float widthLost = (newWidth / (float)width);
 		float heightLost = (newHeight / (float)height);
@@ -98,6 +115,11 @@ void ImageMap::fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths, bool s
 
 void ImageMap::fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths, int R, int G, int B, int A, bool scuff)
 {
+	width = originalWidth;
+	height = originalHeight;
+	tileWidth = originalTileWidth;
+	tileHeight = originalTileHeight;
+
 	float idealFactor = lengths.x / (float)lengths.y;
 	float tileFactor = width / (float)height;
 

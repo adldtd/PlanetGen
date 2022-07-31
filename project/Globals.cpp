@@ -5,19 +5,19 @@ bool loop_x;
 bool loop_y;
 unsigned int seed;
 
-double land_cruncher;
-double island_cruncher;
-double land_point;
-double sparsity;
-double i_sparsity;
-double i_point;
-double i_punish;
+float land_cruncher;
+float island_cruncher;
+float land_point;
+float sparsity;
+float i_sparsity;
+float i_point;
+float i_punish;
 
 bool using_equator;
-double climate_cruncher;
-double range_start;
-double range_stop;
-double max_modify;
+float climate_cruncher;
+float range_start;
+float range_stop;
+float max_modify;
 
-double moisture_cruncher;
-double beach_point;
+float moisture_cruncher;
+float beach_point;
