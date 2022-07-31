@@ -14,6 +14,10 @@ WorldGenGUI::WorldGenGUI(sf::RenderWindow* w)
 	displayBackground.setPosition(sf::Vector2f(0.f, 0.f));
 	displayBackground.setFillColor(sf::Color(0u, 0u, 0u, 255u));
 
+	lengthX = MAP_SCREEN_WIDTH;
+	lengthY = MAP_SCREEN_HEIGHT;
+	length = lengthX * lengthY;
+
 	holdingF4 = false;
 
 	progress = 0;
@@ -152,12 +156,11 @@ void WorldGenGUI::handleEvents(sf::Event& event)
 	{
 		if (!holdingF4)
 		{
-			map.setScale(sf::Vector2f(2.f, 2.f));
-			sf::Vector2f nextPos = map.getPosition();
-			nextPos.x *= 2.0; nextPos.y *= 2.0;
-			map.setPosition(nextPos);
-
 			displayBackground.setScale(sf::Vector2f(2.f, 2.f));
+			map = ImageMap(lengthX, lengthY); //**************************************FOR ONE FRAME, THIS IS TOO EXPENSIVE!!!!!!!!!!!!!!!
+			map.fitToSpace(sf::Vector2f(MAP_SCREEN_X, MAP_SCREEN_Y), sf::Vector2f(MAP_SCREEN_WIDTH * 2.f, MAP_SCREEN_HEIGHT * 2.f), 0, 0, 130, 255, true);
+			lastProgress = 0; //Redraw everything
+
 			gui.unfocusAllWidgets();
 			gui.get<tgui::Button>("startBtn")->onPress.setEnabled(false);
 			gui.get<tgui::Button>("cancelBtn")->onPress.setEnabled(false);
@@ -168,12 +171,11 @@ void WorldGenGUI::handleEvents(sf::Event& event)
 	{
 		if (holdingF4)
 		{
-			map.setScale(sf::Vector2f(1.f, 1.f));
-			sf::Vector2f nextPos = map.getPosition();
-			nextPos.x *= 0.5; nextPos.y *= 0.5;
-			map.setPosition(nextPos);
-
 			displayBackground.setScale(sf::Vector2f(1.f, 1.f));
+			map = ImageMap(lengthX, lengthY);
+			map.fitToSpace(sf::Vector2f(MAP_SCREEN_X, MAP_SCREEN_Y), sf::Vector2f(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT), 0, 0, 130, 255, true);
+			lastProgress = 0;
+
 			gui.unfocusAllWidgets();
 			gui.get<tgui::Button>("startBtn")->onPress.setEnabled(true);
 			gui.get<tgui::Button>("cancelBtn")->onPress.setEnabled(true);
@@ -233,41 +235,6 @@ std::string WorldGenGUI::randomSeed(unsigned int limit)
 	}
 
 	return returnStr;
-}
-
-
-
-/*********************************************************************************************
-Fits a generated map to an enclosed display space
-*********************************************************************************************/
-void WorldGenGUI::fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths)
-{
-	int w = map.getWidth(); //Each is measured in pixels
-	int h = map.getHeight();
-
-	float idealFactor = lengths.x / (float)lengths.y;
-	float tileFactor = w / (float)h;
-
-	if (tileFactor == idealFactor) //Fits perfectly
-	{
-		float scale = lengths.x / (float)w;
-		map.loadMap(sf::Vector2u(1u, 1u), 0, 0, 130, 255, scale);
-		map.setPosition(coordinates);
-	}
-	else if (tileFactor < idealFactor) //Width is too small; fit to height
-	{
-		float scale = lengths.y / (float)h;
-		float offset = ((float)lengths.x - (w * scale)) / 2.0; //Center by width
-		map.loadMap(sf::Vector2u(1u, 1u), 0, 0, 130, 255, scale);
-		map.setPosition(sf::Vector2f(coordinates.x + offset, coordinates.y));
-	}
-	else //Height is too small; fit to width
-	{
-		float scale = lengths.x / (float)w;
-		float offset = ((float)lengths.y - (h * scale)) / 2.0; //Center by width
-		map.loadMap(sf::Vector2u(1u, 1u), 0, 0, 130, 255, scale);
-		map.setPosition(sf::Vector2f(coordinates.x, coordinates.y + offset));
-	}
 }
 
 
@@ -343,7 +310,7 @@ void WorldGenGUI::F_startGeneration()
 		lastProgress = progress;
 		return;
 	}
-	map.fitToSpace(sf::Vector2f(MAP_SCREEN_X, MAP_SCREEN_Y), sf::Vector2f(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT), 0, 0, 130, 255); //This function loads the map
+	map.fitToSpace(sf::Vector2f(MAP_SCREEN_X, MAP_SCREEN_Y), sf::Vector2f(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT), 0, 0, 130, 255, true); //This function loads the map
 
 
 	if (!this->malloc_values())

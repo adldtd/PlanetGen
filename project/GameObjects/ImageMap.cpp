@@ -38,18 +38,35 @@ ImageMap::ImageMap(unsigned int w, unsigned int h)
 	tileHeight = 0.f;
 }
 
-ImageMap::~ImageMap() {}
 
 
-bool ImageMap::loadMap(sf::Vector2u tileSize, float scale)
+bool ImageMap::loadMap(sf::Vector2u tileSize, float scale, bool scuff)
 {
-	return this->loadMap(tileSize, 0, 0, 0, 0, scale);
+	return this->loadMap(tileSize, 0, 0, 0, 0, scale, scuff);
 }
 
-bool ImageMap::loadMap(sf::Vector2u tileSize, int R, int G, int B, int A, float scale)
+bool ImageMap::loadMap(sf::Vector2u tileSize, int R, int G, int B, int A, float s, bool scuff)
 {
-	tileWidth = tileSize.x * scale;
-	tileHeight = tileSize.y * scale;
+	if (!scuff)
+	{
+		tileWidth = tileSize.x * s;
+		tileHeight = tileSize.y * s;
+	}
+	else
+	{
+		float newWidth = width * s;
+		float newHeight = height * s;
+		width = floor(newWidth);
+		height = floor(newHeight);
+
+		float widthLost = (newWidth / (float)width);
+		float heightLost = (newHeight / (float)height);
+		tileWidth = tileSize.x * widthLost;
+		tileHeight = tileSize.y * heightLost;
+	}
+
+	this->scale = s; //NO RELATION TO "getScale()" AND "setScale()" FUNCTIONS
+	//std::cout << s << std::endl;
 
 	for (unsigned int i = 0; i < height; i++) {
 		for (unsigned int j = 0; j < width; j++) {
@@ -68,17 +85,18 @@ bool ImageMap::loadMap(sf::Vector2u tileSize, int R, int G, int B, int A, float 
 		}
 	}
 
+	scuffed = scuff; //Reset whenever a new map is loaded in
 	return true;
 }
 
 
 
-void ImageMap::fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths)
+void ImageMap::fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths, bool scuff)
 {
-	this->fitToSpace(coordinates, lengths, 0, 0, 0, 255);
+	this->fitToSpace(coordinates, lengths, 0, 0, 0, 255, scuff);
 }
 
-void ImageMap::fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths, int R, int G, int B, int A)
+void ImageMap::fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths, int R, int G, int B, int A, bool scuff)
 {
 	float idealFactor = lengths.x / (float)lengths.y;
 	float tileFactor = width / (float)height;
@@ -86,21 +104,30 @@ void ImageMap::fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths, int R,
 	if (tileFactor == idealFactor) //Fits perfectly
 	{
 		float s = lengths.x / (float)width;
-		this->loadMap(sf::Vector2u(1u, 1u), R, G, B, A, s);
+		if (scuff && s < 1.f) //Means that, even if scuff is specified, the map will not always be "scuffed"
+			this->loadMap(sf::Vector2u(1u, 1u), R, G, B, A, s, true);
+		else
+			this->loadMap(sf::Vector2u(1u, 1u), R, G, B, A, s);
 		this->setPosition(coordinates);
 	}
 	else if (tileFactor < idealFactor) //Width is too small; fit to height
 	{
 		float s = lengths.y / (float)height;
 		float offset = ((float)lengths.x - (width * s)) / 2.0; //Center by width
-		this->loadMap(sf::Vector2u(1u, 1u), R, G, B, A, s);
+		if (scuff && s < 1.f)
+			this->loadMap(sf::Vector2u(1u, 1u), R, G, B, A, s, true);
+		else
+			this->loadMap(sf::Vector2u(1u, 1u), R, G, B, A, s);
 		this->setPosition(sf::Vector2f(coordinates.x + offset, coordinates.y));
 	}
 	else //Height is too small; fit to width
 	{
 		float s = lengths.x / (float)width;
 		float offset = ((float)lengths.y - (height * s)) / 2.0; //Center by width
-		this->loadMap(sf::Vector2u(1u, 1u), R, G, B, A, s);
+		if (scuff && s < 1.f) //Means that, even if scuff is specified, the map will not always be "scuffed"
+			this->loadMap(sf::Vector2u(1u, 1u), R, G, B, A, s, true);
+		else
+			this->loadMap(sf::Vector2u(1u, 1u), R, G, B, A, s);
 		this->setPosition(sf::Vector2f(coordinates.x, coordinates.y + offset));
 	}
 }
@@ -109,11 +136,25 @@ void ImageMap::fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths, int R,
 
 bool ImageMap::updateTile(sf::Vector2u tileSpace, int R, int G, int B, int A) {
 
-	if (tileSpace.x > width || tileSpace.y > height) {
+	unsigned int x;
+	unsigned int y;
+
+	if (scuffed)
+	{
+		x = floor(tileSpace.x * scale);
+		y = floor(tileSpace.y * scale);
+	}
+	else
+	{
+		x = tileSpace.x;
+		y = tileSpace.y;
+	}
+
+	if (x > width || y > height) {
 		return false;
 	}
 
-	sf::Vertex* tile = &obj[(tileSpace.x + (tileSpace.y * width)) * 4];
+	sf::Vertex* tile = &obj[(x + (y * width)) * 4];
 
 	tile[0].color = sf::Color(R, G, B, A);
 	tile[1].color = sf::Color(R, G, B, A);
@@ -125,3 +166,4 @@ bool ImageMap::updateTile(sf::Vector2u tileSpace, int R, int G, int B, int A) {
 
 unsigned int ImageMap::getWidth() const { return width; }
 unsigned int ImageMap::getHeight() const { return height; }
+bool ImageMap::isScuffed() const { return scuffed; }

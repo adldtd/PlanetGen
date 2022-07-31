@@ -62,7 +62,7 @@ private:
 	bool malloc_values(); //Instantiate buffer, elevation, moisture, and climate
 	void free_values(); //Delete those values; free memory up
 
-	void fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths);
+	//void fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths);
 	
 	static unsigned int transformSeed(std::string seed); //Converts a seed into a numerical value using a pseudorandom function
 	static std::string randomSeed(unsigned int limit); //Returns a string filled with random characters

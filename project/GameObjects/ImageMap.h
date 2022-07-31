@@ -12,18 +12,18 @@ class ImageMap : public Entity
 public:
 
 	ImageMap(unsigned int width, unsigned int height);
-	virtual ~ImageMap();
 
-	bool loadMap(sf::Vector2u tileSize, float scale = 1.0); //Loads no array
-	bool loadMap(sf::Vector2u tileSize, int R, int G, int B, int A, float scale = 1.0); //Loads a specific color for all spaces
+	bool loadMap(sf::Vector2u tileSize, float scale = 1.0, bool scuff = false);
+	bool loadMap(sf::Vector2u tileSize, int R, int G, int B, int A, float scale = 1.0, bool scuff = false); //Loads a specific color for all spaces
 
-	void fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths); //Reloads the map
-	void fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths, int R, int G, int B, int A);
+	void fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths, bool scuff = false); //Reloads the map
+	void fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths, int R, int G, int B, int A, bool scuff = false);
 
 	bool updateTile(sf::Vector2u tileSpace, int R, int G, int B, int A); //Changes a tile's color without changing the map array
 
 	unsigned int getWidth() const;
 	unsigned int getHeight() const;
+	bool isScuffed() const;
 
 protected:
 
@@ -32,4 +32,7 @@ protected:
 
 	float tileWidth; //In pixels
 	float tileHeight;
+
+	bool scuffed; //"Scuffed" mode indicates whether the VertexArray is simply scaled, or completely recreated when scale() is called
+	float scale = 0.f;
 };

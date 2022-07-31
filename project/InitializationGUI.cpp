@@ -11,7 +11,7 @@ void WorldGenGUI::initialize()
 	gui.setFont(mainFont);
 
 	map = ImageMap(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT);
-	this->fitToSpace(sf::Vector2f(MAP_SCREEN_X, MAP_SCREEN_Y), sf::Vector2f(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT)); //Start with a map at the maximum screen size
+	map.fitToSpace(sf::Vector2f(MAP_SCREEN_X, MAP_SCREEN_Y), sf::Vector2f(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT), 0, 0, 130, 255, true); //Start with a map at the maximum screen size
 
 	//********************************************************************************************* GENERATION GUI GROUP
 
