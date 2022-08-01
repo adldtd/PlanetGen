@@ -50,8 +50,8 @@
 
 
 void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileLocation, char* buffer, float* elevation,
-				   float* moisture, float* climate, bool& inProgress, int &progress, unsigned int seed, std::mutex* phone,
-				   bool useMutex)
+				   float* moisture, float* climate, bool& inProgress, int &progress, int &stage, unsigned int seed, 
+				   std::mutex* phone, bool useMutex)
 {
 
 	if (seed == 0) {
@@ -68,10 +68,6 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 	siv::PerlinNoise cgen{ continentSeed };
 	siv::PerlinNoise igen{ islandSeed };
 	siv::PerlinNoise mgen{ moistureSeed };
-
-	//std::ofstream earthFile;
-	//earthFile.open(fileLocation, std::ios::out | std::ios::binary);
-	//earthFile.seekp(0);
 
 	unsigned int length = lengthX * lengthY;
 	bool polarX = loop_x;
@@ -210,8 +206,8 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 		}
 	}
 
-
 	
+
 	std::cout << "Generating heat" << std::endl;
 	siv::PerlinNoise::seed_type climateSeed = rand();
 	siv::PerlinNoise clgen{ climateSeed };
@@ -279,6 +275,16 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 			if (useMutex) phone->unlock();
 		}
 	}
+
+	if (useMutex) phone->lock();
+	if (!inProgress)
+	{
+		if (useMutex) phone->unlock();
+		return;
+	}
+	progress = 0;
+	stage++;
+	if (useMutex) phone->unlock();
 
 
 
@@ -757,18 +763,7 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 	}
 
 
-	/*char sizeX[] = {lengthX % 256,
-					(lengthX / 256) % 256,
-					(lengthX / 65536) % 256,
-					(lengthX / 16777216) }; //Lengths are stored in reverse
-	char sizeY[] = { lengthY % 256,
-					(lengthY / 256) % 256,
-					(lengthY / 65536) % 256,
-					(lengthY / 16777216) };*/
 
-	//earthFile.write(sizeX, 4); earthFile.write(sizeY, 4);
-	//earthFile.write(buffer, length);
-	//earthFile.close();
 	std::cout << "Complete" << std::endl;
 
 	if (useMutex) phone->lock();

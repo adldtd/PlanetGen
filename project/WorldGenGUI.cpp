@@ -21,7 +21,9 @@ WorldGenGUI::WorldGenGUI(sf::RenderWindow* w)
 	holdingF4 = false;
 
 	progress = 0;
+	stage = 0;
 	lastProgress = 0;
+	lastStage = 0;
 	inProgress = false;
 
 	this->setTarget(w);
@@ -133,8 +135,9 @@ Called once every frame to check for and accommodate for changes
 void WorldGenGUI::update()
 {
 	phone.lock(); //Load pixels on tile map
-	if (lastProgress < progress) {
-		while (lastProgress < progress) //******************************************** MAKE SURE LASTPROGRESS OR PROGRESS DO NOT OVERFLOW
+	if (lastProgress < progress - 1 || lastStage < stage)
+	{
+		while (lastProgress < progress - 1 || lastStage < stage)
 		{
 			lastProgress++;
 			int index = lastProgress % length;
@@ -143,12 +146,29 @@ void WorldGenGUI::update()
 			int coloring[4] = { 0, 0, 0, 255 };
 			returnRGBA(buffer[index], coloring);
 			map.updateTile(sf::Vector2u(tileX, tileY), coloring[0], coloring[1], coloring[2], coloring[3]);
+
+			if ((lastProgress == (length - 1)) && lastStage < stage)
+			{
+				lastProgress = 0;
+				lastStage++;
+			}
 		}
 
-		lastProgress--; //Quick fix for a bug where the program sometimes "skips" certain pixels
+		if (inProgress)
+			lastProgress--; //Quick fix for a bug where the program sometimes "skips" certain pixels; lastProgress will always be less than progress
 	}
 	phone.unlock();
 }
+
+void WorldGenGUI::draw()
+{
+	window->draw(background);
+	window->draw(displayBackground);
+	window->draw(map);
+	if (!holdingF4) gui.draw();
+}
+
+
 
 void WorldGenGUI::handleEvents(sf::Event& event)
 {
@@ -159,7 +179,7 @@ void WorldGenGUI::handleEvents(sf::Event& event)
 			displayBackground.setScale(sf::Vector2f(2.f, 2.f));
 			//map = ImageMap(lengthX, lengthY); //**************************************FOR ONE FRAME, THIS IS TOO EXPENSIVE!!!!!!!!!
 			map.fitToSpace(sf::Vector2f(MAP_SCREEN_X, MAP_SCREEN_Y), sf::Vector2f(MAP_SCREEN_WIDTH * 2.f, MAP_SCREEN_HEIGHT * 2.f), 0, 0, 130, 255, true);
-			lastProgress = 0; //Redraw everything
+			this->fillImageMap();
 
 			gui.unfocusAllWidgets();
 			gui.get<tgui::Button>("startBtn")->onPress.setEnabled(false);
@@ -174,7 +194,7 @@ void WorldGenGUI::handleEvents(sf::Event& event)
 			displayBackground.setScale(sf::Vector2f(1.f, 1.f));
 			//map = ImageMap(lengthX, lengthY);
 			map.fitToSpace(sf::Vector2f(MAP_SCREEN_X, MAP_SCREEN_Y), sf::Vector2f(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT), 0, 0, 130, 255, true);
-			lastProgress = 0;
+			this->fillImageMap();
 
 			gui.unfocusAllWidgets();
 			gui.get<tgui::Button>("startBtn")->onPress.setEnabled(true);
@@ -186,12 +206,27 @@ void WorldGenGUI::handleEvents(sf::Event& event)
 	gui.handleEvent(event);
 }
 
-void WorldGenGUI::draw()
+/*********************************************************************************************
+Called once every frame to check for and accommodate for changes
+*********************************************************************************************/
+void WorldGenGUI::fillImageMap()
 {
-	window->draw(background);
-	window->draw(displayBackground);
-	window->draw(map);
-	if (!holdingF4) gui.draw();
+	phone.lock();
+
+	unsigned int limit;
+	if (stage == 0) //The generator has not created all of the sea + continents yet
+		limit = progress;
+	else
+		limit = length;
+
+	for (unsigned int i = 0; i < limit; i++)
+	{
+		unsigned int tileX = i % lengthX; unsigned int tileY = i / lengthX;
+		int coloring[4] = { 0, 0, 0, 255 };
+		returnRGBA(buffer[i], coloring);
+		map.updateTile(sf::Vector2u(tileX, tileY), coloring[0], coloring[1], coloring[2], coloring[3]);
+	}
+	phone.unlock();
 }
 
 
@@ -320,12 +355,14 @@ void WorldGenGUI::F_startGeneration()
 	}
 
 	progress = 0;
+	stage = 0;
 	lastProgress = 0;
+	lastStage = 0;
 	inProgress = true;
 
 	auto gen = [this]()
 	{
-		generateEarth(lengthX, lengthY, "earth.bin", buffer, elevation, moisture, climate, inProgress, progress, seed, &phone, true);
+		generateEarth(lengthX, lengthY, "earth.bin", buffer, elevation, moisture, climate, inProgress, progress, stage, seed, &phone, true);
 	};
 
 	t2 = std::thread(gen); //Automatically starts execution
@@ -341,7 +378,10 @@ void WorldGenGUI::F_stopGeneration()
 		inProgress = false; //Abort
 	phone.unlock();
 	if (t2.joinable())
+	{
 		t2.join(); //Wait until task is aborted
+		std::cout << "Cancelled" << std::endl;
+	}
 }
 
 /*********************************************************************************************

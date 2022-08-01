@@ -3,8 +3,8 @@
 #include <mutex>
 
 void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileLocation, char* buffer, float* elevation,
-				   float* moisture, float* climate, bool& inProgress, int& progress, unsigned int seed = 0, std::mutex* phone = nullptr,
-				   bool useMutex = false);
+				   float* moisture, float* climate, bool& inProgress, int& progress, int& stage, unsigned int seed = 0,
+				   std::mutex* phone = nullptr, bool useMutex = false);
 
 double normalFunction(double x, double mean = 0.0, double deviation = 1.0);
 float normalizeToRange(float ix1, float ix2, float tx1, float tx2, float i);

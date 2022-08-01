@@ -52,7 +52,9 @@ private:
 	unsigned int length;
 
 	int progress;
+	int stage;
 	int lastProgress;
+	int lastStage;
 	bool inProgress; //Variable passed to the generation function; remains true unless execution has to be stopped
 
 	void initialize(); //Called by constructor; sets up all of the window widgets
@@ -62,7 +64,7 @@ private:
 	bool malloc_values(); //Instantiate buffer, elevation, moisture, and climate
 	void free_values(); //Delete those values; free memory up
 
-	//void fitToSpace(sf::Vector2f coordinates, sf::Vector2f lengths);
+	void fillImageMap(); //Update every tile of map with buffer values
 	
 	static unsigned int transformSeed(std::string seed); //Converts a seed into a numerical value using a pseudorandom function
 	static std::string randomSeed(unsigned int limit); //Returns a string filled with random characters

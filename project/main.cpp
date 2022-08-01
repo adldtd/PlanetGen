@@ -4,7 +4,7 @@
 
 int main()
 {
-	sf::RenderWindow window(sf::VideoMode(736u, 368u), "World", sf::Style::Close); //The generated world is to fit inside a 368x184 sized space
+	sf::RenderWindow window(sf::VideoMode(736u, 368u), "WorldGen", sf::Style::Close); //The generated world is to fit inside a 368x184 sized space
 	window.setKeyRepeatEnabled(false);
 	window.setFramerateLimit(60u);
 
