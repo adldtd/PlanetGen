@@ -1,7 +1,7 @@
 # PlanetGen
 
 ### The current GUI. In the program, press and hold F4 to zoom in on the map
-![GUI](/screenshots/currentgui.png)
+![GUI](/screenshots/current.png)
 
 A C++ GUI kit which uses Perlin Noise to create Earth-like worlds. Comes with customization settings to modify world size, land, climate, and moisture. This project uses SFML (https://www.sfml-dev.org/), the TGUI package (https://tgui.eu/), and a Perlin Noise library (https://github.com/Reputeless/PerlinNoise).
 
