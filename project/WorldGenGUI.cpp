@@ -26,6 +26,7 @@ WorldGenGUI::WorldGenGUI(sf::RenderWindow* w)
 	lastProgress = 0;
 	lastStage = 0;
 	inProgress = false;
+	incomplete = true;
 
 	this->setTarget(w);
 	initialize();
@@ -158,6 +159,12 @@ void WorldGenGUI::update()
 		if (inProgress)
 			lastProgress--; //Quick fix for a bug where the program sometimes "skips" certain pixels; lastProgress will always be less than progress
 	}
+
+	if (!inProgress && !incomplete)
+		gui.get<tgui::Button>("saveBtn")->setEnabled(true);
+	else
+		gui.get<tgui::Button>("saveBtn")->setEnabled(false);
+
 	phone.unlock();
 }
 
@@ -185,6 +192,7 @@ void WorldGenGUI::handleEvents(sf::Event& event)
 			gui.unfocusAllWidgets();
 			gui.get<tgui::Button>("startBtn")->onPress.setEnabled(false);
 			gui.get<tgui::Button>("cancelBtn")->onPress.setEnabled(false);
+			gui.get<tgui::Button>("saveBtn")->onPress.setEnabled(false);
 			holdingF4 = true;
 		}
 	}
@@ -200,6 +208,7 @@ void WorldGenGUI::handleEvents(sf::Event& event)
 			gui.unfocusAllWidgets();
 			gui.get<tgui::Button>("startBtn")->onPress.setEnabled(true);
 			gui.get<tgui::Button>("cancelBtn")->onPress.setEnabled(true);
+			gui.get<tgui::Button>("saveBtn")->onPress.setEnabled(true);
 			holdingF4 = false;
 		}
 	}
@@ -248,7 +257,7 @@ unsigned char** WorldGenGUI::export_color_map() const
 	}
 
 	unsigned int r = 0;
-	while (r < lengthY)
+	for (unsigned int r = 0; r < lengthY; r++)
 	{
 		try
 		{
@@ -381,6 +390,7 @@ void WorldGenGUI::F_startGeneration()
 {
 	this->F_stopGeneration();
 	this->free_values(); //Reset for new lengths
+	gui.get<tgui::Button>("saveBtn")->setEnabled(false);
 
 	this->setGlobals(); //Retrieve all information entered into the GUI
 
@@ -389,12 +399,16 @@ void WorldGenGUI::F_startGeneration()
 	length = lengthX * lengthY;
 
 	if (length == 0)
+	{
+		incomplete = true;
 		return;
+	}
 
 	map = ImageMap(lengthX, lengthY);
 	if (map.getHeight() == 0u || map.getWidth() == 0u)
 	{
 		lastProgress = progress;
+		incomplete = true;
 		return;
 	}
 	map.fitToSpace(sf::Vector2f(MAP_SCREEN_X, MAP_SCREEN_Y), sf::Vector2f(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT), 0, 0, 130, 255, true); //This function loads the map
@@ -403,6 +417,7 @@ void WorldGenGUI::F_startGeneration()
 	if (!this->malloc_values())
 	{
 		lastProgress = progress;
+		incomplete = true;
 		return;
 	}
 
@@ -411,6 +426,7 @@ void WorldGenGUI::F_startGeneration()
 	lastProgress = 0;
 	lastStage = 0;
 	inProgress = true;
+	incomplete = false;
 
 	auto gen = [this]()
 	{
@@ -427,7 +443,10 @@ void WorldGenGUI::F_stopGeneration()
 {
 	phone.lock();
 	if (inProgress)
+	{
 		inProgress = false; //Abort
+		incomplete = true; //Unsaveable
+	}
 	phone.unlock();
 	if (t2.joinable())
 	{
@@ -450,7 +469,11 @@ void WorldGenGUI::F_saveImage()
 	phone.unlock();
 
 	unsigned char** colors = this->export_color_map();
-	if (!colors) return;
+	if (!colors)
+	{
+		std::cout << "The map could not be saved." << std::endl;
+		return;
+	}
 
 	if (!save(colors, seedString.c_str(), lengthX, lengthY))
 		std::cout << "The map could not be saved." << std::endl;

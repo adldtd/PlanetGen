@@ -24,8 +24,15 @@ void WorldGenGUI::initialize()
 	tgui::Button::Ptr cancelBtn = tgui::Button::create("Cancel");
 	cancelBtn->setTextSize(19u);
 	cancelBtn->setSize(95.f, 25.f);
-	cancelBtn->setPosition(135.f, 200.f);
+	cancelBtn->setPosition(140.f, 200.f);
 	cancelBtn->onPress([this]() { this->F_stopGeneration(); });
+
+	tgui::Button::Ptr saveBtn = tgui::Button::create("Save");
+	saveBtn->setTextSize(19u);
+	saveBtn->setSize(95.f, 25.f);
+	saveBtn->setPosition(255.f, 200.f);
+	saveBtn->onPress([this]() { this->F_saveImage(); });
+	saveBtn->setEnabled(false);
 
 	//********************************************************************************************* WORLD META GUI GROUP
 
@@ -409,6 +416,7 @@ void WorldGenGUI::initialize()
 
 	gui.add(startBtn, "startBtn");
 	gui.add(cancelBtn, "cancelBtn");
+	gui.add(saveBtn, "saveBtn");
 
 	gui.add(worldArea, "worldArea");
 	gui.add(loopXArea, "loopXArea");

@@ -57,6 +57,7 @@ private:
 	int lastProgress;
 	int lastStage;
 	bool inProgress; //Variable passed to the generation function; remains true unless execution has to be stopped
+	bool incomplete; //Variable that keeps track of when generation is terminated, not allowing a save
 
 	void initialize(); //Called by constructor; sets up all of the window widgets
 	void setGlobals(); //Retrieve the GUI variables, and set the globals to equal them
