@@ -2,6 +2,7 @@
 #include <TGUI/TGUI.hpp>
 #include <SFML/Graphics.hpp>
 #include "Globals.h"
+#include "save.h"
 #include <climits>
 
 WorldGenGUI::WorldGenGUI(sf::RenderWindow* w)
@@ -68,10 +69,10 @@ void WorldGenGUI::setGlobals()
 	loop_x = gui.get<tgui::ToggleButton>("loopXBtn")->isDown();
 	loop_y = gui.get<tgui::ToggleButton>("loopYBtn")->isDown();
 
-	std::string s = gui.get<tgui::EditBox>("seedBox")->getText().toStdString();
-	if (s == "")
-		s = WorldGenGUI::randomSeed(19u);
-	seed = WorldGenGUI::transformSeed(s);
+	seedString = gui.get<tgui::EditBox>("seedBox")->getText().toStdString();
+	if (seedString == "")
+		seedString = WorldGenGUI::randomSeed(19u);
+	seed = WorldGenGUI::transformSeed(seedString);
 
 	land_cruncher = gui.get<tgui::EditBox>("landCruncherBox")->getText().toFloat(1.f);
 	land_point = gui.get<tgui::EditBox>("landPointBox")->getText().toFloat(0.f);
@@ -96,7 +97,7 @@ void WorldGenGUI::setGlobals()
 
 	updateVarSafely("widthBox", tgui::String(length_x));
 	updateVarSafely("heightBox", tgui::String(length_y));
-	updateVarSafely("seedBox", s);
+	updateVarSafely("seedBox", seedString);
 
 	updateVarSafely("landCruncherBox", tgui::String(land_cruncher));
 	updateVarSafely("landPointBox", tgui::String(land_point));
@@ -143,7 +144,7 @@ void WorldGenGUI::update()
 			int index = lastProgress % length;
 			unsigned int tileX = index % lengthX; unsigned int tileY = index / lengthX;
 
-			int coloring[4] = { 0, 0, 0, 255 };
+			int coloring[4];
 			returnRGBA(buffer[index], coloring);
 			map.updateTile(sf::Vector2u(tileX, tileY), coloring[0], coloring[1], coloring[2], coloring[3]);
 
@@ -207,7 +208,7 @@ void WorldGenGUI::handleEvents(sf::Event& event)
 }
 
 /*********************************************************************************************
-Called once every frame to check for and accommodate for changes
+Fills map up with all data currently retrieved
 *********************************************************************************************/
 void WorldGenGUI::fillImageMap()
 {
@@ -227,6 +228,57 @@ void WorldGenGUI::fillImageMap()
 		map.updateTile(sf::Vector2u(tileX, tileY), coloring[0], coloring[1], coloring[2], coloring[3]);
 	}
 	phone.unlock();
+}
+
+/*********************************************************************************************
+Creates a 2D RGBA byte array to pass to the save function; should not be callable while the
+generator is still running
+*********************************************************************************************/
+unsigned char** WorldGenGUI::export_color_map() const
+{
+	unsigned char** colors;
+	try
+	{
+		colors = new unsigned char* [lengthY];
+	}
+	catch (std::bad_alloc e)
+	{
+		std::cout << "Could not allocate enough memory for image data" << std::endl;
+		return NULL;
+	}
+
+	unsigned int r = 0;
+	while (r < lengthY)
+	{
+		try
+		{
+			colors[r] = new unsigned char[lengthX * 4];
+		}
+		catch (std::bad_alloc e)
+		{
+			std::cout << "Could not allocate enough memory for row " << r << " of the image data" << std::endl;
+			for (unsigned int j = 0; j < r; j++)
+				delete[] colors[j];
+			delete[] colors;
+			return NULL;
+		}
+
+		for (unsigned int i = 0; i < lengthX; i++)
+		{
+			unsigned int bufferIndex = i + (r * lengthX);
+			unsigned int byteIndex = i * 4;
+
+			int coloring[4];
+			returnRGBA(buffer[bufferIndex], coloring);
+
+			colors[r][byteIndex] = coloring[0];
+			colors[r][byteIndex + 1] = coloring[1];
+			colors[r][byteIndex + 2] = coloring[2];
+			colors[r][byteIndex + 3] = coloring[3];
+		}
+	}
+
+	return colors;
 }
 
 
@@ -382,6 +434,26 @@ void WorldGenGUI::F_stopGeneration()
 		t2.join(); //Wait until task is aborted
 		std::cout << "Cancelled" << std::endl;
 	}
+}
+
+/*********************************************************************************************
+Saves the loaded map as a PNG image
+*********************************************************************************************/
+void WorldGenGUI::F_saveImage()
+{
+	phone.lock();
+	if (inProgress)
+	{
+		phone.unlock();
+		return;
+	}
+	phone.unlock();
+
+	unsigned char** colors = this->export_color_map();
+	if (!colors) return;
+
+	if (!save(colors, seedString.c_str(), lengthX, lengthY))
+		std::cout << "The map could not be saved." << std::endl;
 }
 
 /*********************************************************************************************

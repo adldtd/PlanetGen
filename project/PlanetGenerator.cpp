@@ -934,6 +934,12 @@ void returnRGBA(int val, int* rgb)
 			rgb[2] = 31;
 			rgb[3] = 255;
 			break;
+		default:
+			rgb[0] = 0;
+			rgb[1] = 0;
+			rgb[2] = 0;
+			rgb[3] = 255;
+			break;
 	}
 }
 

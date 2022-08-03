@@ -50,6 +50,7 @@ private:
 	unsigned int lengthX;
 	unsigned int lengthY;
 	unsigned int length;
+	std::string seedString;
 
 	int progress;
 	int stage;
@@ -65,12 +66,14 @@ private:
 	void free_values(); //Delete those values; free memory up
 
 	void fillImageMap(); //Update every tile of map with buffer values
+	unsigned char** export_color_map() const; //Creates an array of byte colors to be passed to the save function
 	
 	static unsigned int transformSeed(std::string seed); //Converts a seed into a numerical value using a pseudorandom function
 	static std::string randomSeed(unsigned int limit); //Returns a string filled with random characters
 
 	void F_startGeneration();
 	void F_stopGeneration();
+	void F_saveImage();
 	void F_manageNumInput(tgui::EditBox::Ptr box, bool forceInt = false, bool forceUnsigned = false); //Stops users from entering non-numerical input
 	void F_scaleInput(tgui::EditBox::Ptr box, unsigned int limit); //Limits input to a certain amount of characters
 };
