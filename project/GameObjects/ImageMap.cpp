@@ -3,13 +3,13 @@
 #include <SFML/Graphics.hpp>
 #include "ImageMap.h"
 
-ImageMap::ImageMap(unsigned int w, unsigned int h)
+ImageMap::ImageMap(unsigned int w, unsigned int h, bool formObj)
 {
 	originalWidth = w; //Can only be changed by the constructor
 	originalHeight = h;
 
 	obj.setPrimitiveType(sf::Quads);
-	this->reform(w, h);
+	if (formObj) this->reform(w, h);
 
 	tileWidth = 0.f; //Later initialized when a map is loaded
 	tileHeight = 0.f;
@@ -44,6 +44,7 @@ bool ImageMap::reform(unsigned int w, unsigned int h)
 	{
 		width = 0u; //Failsafe for when SFML cannot create the ImageMap
 		height = 0u;
+		obj.resize(0);
 	}
 
 	return !failed;
@@ -65,6 +66,14 @@ bool ImageMap::loadMap(sf::Vector2u tileSize, int R, int G, int B, int A, float 
 	{
 		tileWidth = tileSize.x * s;
 		tileHeight = tileSize.y * s;
+		
+		//Either obj was uninitialized, or it needs to be inflated again after being scuffed
+		if (obj.getVertexCount() != (width * height * 4))
+		{
+			if (!this->reform(width, height))
+				return false;
+		}
+
 	}
 	else
 	{
@@ -188,4 +197,6 @@ bool ImageMap::updateTile(sf::Vector2u tileSpace, int R, int G, int B, int A) {
 
 unsigned int ImageMap::getWidth() const { return width; }
 unsigned int ImageMap::getHeight() const { return height; }
+float ImageMap::getTileWidth() const { return tileWidth; }
+float ImageMap::getTileHeight() const { return tileHeight; }
 bool ImageMap::isScuffed() const { return scuffed; }

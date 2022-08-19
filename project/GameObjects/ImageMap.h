@@ -11,7 +11,7 @@ class ImageMap : public Entity
 {
 public:
 
-	ImageMap(unsigned int width, unsigned int height);
+	ImageMap(unsigned int width, unsigned int height, bool formObj = true);
 	bool reform(unsigned int width, unsigned int height); //Resizes the VertexArray
 
 	bool loadMap(sf::Vector2u tileSize, float scale = 1.0, bool scuff = false);
@@ -24,6 +24,8 @@ public:
 
 	unsigned int getWidth() const;
 	unsigned int getHeight() const;
+	float getTileWidth() const;
+	float getTileHeight() const;
 	bool isScuffed() const;
 
 protected:

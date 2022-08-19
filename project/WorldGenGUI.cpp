@@ -149,11 +149,12 @@ void WorldGenGUI::update()
 			returnRGBA(buffer[index], coloring);
 			map.updateTile(sf::Vector2u(tileX, tileY), coloring[0], coloring[1], coloring[2], coloring[3]);
 
-			if ((lastProgress == (length - 1)) && lastStage < stage)
+			if ((lastProgress >= (length - 1)) && lastStage < stage)
 			{
 				lastProgress = 0;
 				lastStage++;
 			}
+			
 		}
 
 		if (inProgress)
@@ -217,7 +218,7 @@ void WorldGenGUI::handleEvents(sf::Event& event)
 }
 
 /*********************************************************************************************
-Fills map up with all data currently retrieved
+Fills map up with all data currently retrieved; accounts for scuffing to save time
 *********************************************************************************************/
 void WorldGenGUI::fillImageMap()
 {
@@ -229,6 +230,33 @@ void WorldGenGUI::fillImageMap()
 	else
 		limit = length;
 
+	
+	unsigned int xLimit = limit % lengthX;
+	unsigned int yLimit = limit / lengthX;
+
+	float xIncrease = 1.f;
+	float yIncrease = 1.f;
+
+	if (map.isScuffed())
+	{
+		//Equal to the ratio of (originalDimension * originalTileDim) to (scuffedDimension * scuffedTileDim); originalTileDim should always be 1
+		float xIncrease = lengthX / (map.getWidth() * map.getTileWidth());
+		float yIncrease = lengthY / (map.getHeight() * map.getTileHeight());
+	}
+
+	for (unsigned int r = 0; r < yLimit + 1; r += yIncrease)
+	{
+		for (unsigned int c = 0; (c < xLimit || r != yLimit) && c < lengthX; c += xIncrease)
+		{
+			unsigned int index = (r * lengthX) + c;
+			int coloring[4] = { 0, 0, 0, 255 };
+			returnRGBA(buffer[index], coloring);
+			map.updateTile(sf::Vector2u(c, r), coloring[0], coloring[1], coloring[2], coloring[3]);
+		}
+	}
+	
+
+	/*
 	for (unsigned int i = 0; i < limit; i++)
 	{
 		unsigned int tileX = i % lengthX; unsigned int tileY = i / lengthX;
@@ -236,6 +264,7 @@ void WorldGenGUI::fillImageMap()
 		returnRGBA(buffer[i], coloring);
 		map.updateTile(sf::Vector2u(tileX, tileY), coloring[0], coloring[1], coloring[2], coloring[3]);
 	}
+	*/
 	phone.unlock();
 }
 
@@ -404,7 +433,10 @@ void WorldGenGUI::F_startGeneration()
 		return;
 	}
 
-	map = ImageMap(lengthX, lengthY);
+	map = ImageMap(lengthX, lengthY, false); //Do not form the map just yet
+
+	//"Probe" the map; see if the largest size it will be will fit into memory
+	map.fitToSpace(sf::Vector2f(MAP_SCREEN_X, MAP_SCREEN_Y), sf::Vector2f(MAP_SCREEN_WIDTH * 2.f, MAP_SCREEN_HEIGHT * 2.f), 0, 0, 130, 255, true);
 	if (map.getHeight() == 0u || map.getWidth() == 0u)
 	{
 		lastProgress = progress;
@@ -416,6 +448,7 @@ void WorldGenGUI::F_startGeneration()
 
 	if (!this->malloc_values())
 	{
+		map.reform(0u, 0u); //Erase the map
 		lastProgress = progress;
 		incomplete = true;
 		return;
@@ -423,7 +456,7 @@ void WorldGenGUI::F_startGeneration()
 
 	progress = 0;
 	stage = 0;
-	lastProgress = 0;
+	lastProgress = -1;
 	lastStage = 0;
 	inProgress = true;
 	incomplete = false;
@@ -444,8 +477,8 @@ void WorldGenGUI::F_stopGeneration()
 	phone.lock();
 	if (inProgress)
 	{
-		inProgress = false; //Abort
-		incomplete = true; //Unsaveable
+		inProgress = false; //Abort the other thread
+		incomplete = true; //Is now unsavable
 	}
 	phone.unlock();
 	if (t2.joinable())
