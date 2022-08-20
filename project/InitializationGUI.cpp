@@ -2,6 +2,8 @@
 #include <TGUI/TGUI.hpp>
 #include <SFML/Graphics.hpp>
 
+void registerHeader(tgui::EditBox::Ptr header);
+
 /*********************************************************************************************
 Entirely responsible for the layout, styling, and functionality of the GUI upon loading
 *********************************************************************************************/
@@ -43,37 +45,59 @@ void WorldGenGUI::initialize()
 	worldArea->setText("World");
 	worldArea->setTextSize(9u);
 
+	tgui::TextArea::Ptr worldInfo = tgui::TextArea::create();
+	worldInfo->setSize(145.f, 27.f);
+	worldInfo->addText("Meta information for WorldGen");
+	worldInfo->setTextSize(9u);
+	worldInfo->setReadOnly();
+	worldArea->setToolTip(worldInfo);
+
+
 	tgui::EditBox::Ptr loopXArea = tgui::EditBox::create();
-	loopXArea->setReadOnly();
-	loopXArea->setSize(70.f, 16.f);
+	registerHeader(loopXArea);
 	loopXArea->setPosition(519.f, 2.f);
 	loopXArea->setText("Hori. Loop");
-	loopXArea->setTextSize(9u);
-	loopXArea->setAlignment(tgui::EditBox::Alignment::Center);
+
+	tgui::TextArea::Ptr loopXInfo = tgui::TextArea::create();
+	loopXInfo->setSize(145.f, 27.f);
+	loopXInfo->addText("When enabled, the map loops around horizontally");
+	loopXInfo->setTextSize(9u);
+	loopXInfo->setReadOnly();
+	loopXArea->setToolTip(loopXInfo);
 
 	tgui::ToggleButton::Ptr loopXBtn = tgui::ToggleButton::create();
 	loopXBtn->setSize(16.f, 16.f);
 	loopXBtn->setPosition(504.f, 2.f);
 
+
 	tgui::EditBox::Ptr loopYArea = tgui::EditBox::create();
-	loopYArea->setReadOnly();
-	loopYArea->setSize(70.f, 16.f);
+	registerHeader(loopYArea);
 	loopYArea->setPosition(620.f, 2.f);
 	loopYArea->setText("Verti. Loop");
-	loopYArea->setTextSize(9u);
-	loopYArea->setAlignment(tgui::EditBox::Alignment::Center);
+
+	tgui::TextArea::Ptr loopYInfo = tgui::TextArea::create();
+	loopYInfo->setSize(145.f, 27.f);
+	loopYInfo->addText("When enabled, the map loops around vertically");
+	loopYInfo->setTextSize(9u);
+	loopYInfo->setReadOnly();
+	loopYArea->setToolTip(loopYInfo);
 
 	tgui::ToggleButton::Ptr loopYBtn = tgui::ToggleButton::create();
 	loopYBtn->setSize(16.f, 16.f);
 	loopYBtn->setPosition(605.f, 2.f);
 
+
 	tgui::EditBox::Ptr widthArea = tgui::EditBox::create();
-	widthArea->setReadOnly();
-	widthArea->setSize(70.f, 16.f);
+	registerHeader(widthArea);
 	widthArea->setPosition(388.f, 23.f);
 	widthArea->setText("Map Width");
-	widthArea->setTextSize(9u);
-	widthArea->setAlignment(tgui::EditBox::Alignment::Center);
+
+	tgui::TextArea::Ptr widthInfo = tgui::TextArea::create();
+	widthInfo->setSize(145.f, 16.f);
+	widthInfo->addText("The map's pixel width");
+	widthInfo->setTextSize(9u);
+	widthInfo->setReadOnly();
+	widthArea->setToolTip(widthInfo);
 
 	tgui::EditBox::Ptr widthBox = tgui::EditBox::create();
 	widthBox->setSize(70.f, 25.f);
@@ -85,13 +109,18 @@ void WorldGenGUI::initialize()
 		this->F_manageNumInput(WB, true, true);
 	});
 
+
 	tgui::EditBox::Ptr heightArea = tgui::EditBox::create();
-	heightArea->setReadOnly();
-	heightArea->setSize(70.f, 16.f);
+	registerHeader(heightArea);
 	heightArea->setPosition(480.f, 23.f);
 	heightArea->setText("Map Height");
-	heightArea->setTextSize(9u);
-	heightArea->setAlignment(tgui::EditBox::Alignment::Center);
+
+	tgui::TextArea::Ptr heightInfo = tgui::TextArea::create();
+	heightInfo->setSize(145.f, 16.f);
+	heightInfo->addText("The map's pixel height");
+	heightInfo->setTextSize(9u);
+	heightInfo->setReadOnly();
+	heightArea->setToolTip(heightInfo);
 
 	tgui::EditBox::Ptr heightBox = tgui::EditBox::create();
 	heightBox->setSize(70.f, 25.f);
@@ -103,13 +132,11 @@ void WorldGenGUI::initialize()
 		this->F_manageNumInput(HB, true, true);
 	});
 
+
 	tgui::EditBox::Ptr seedArea = tgui::EditBox::create();
-	seedArea->setReadOnly();
-	seedArea->setSize(70.f, 16.f);
+	registerHeader(seedArea);
 	seedArea->setPosition(572.f, 23.f);
 	seedArea->setText("Seed");
-	seedArea->setTextSize(9u);
-	seedArea->setAlignment(tgui::EditBox::Alignment::Center);
 
 	tgui::EditBox::Ptr seedBox = tgui::EditBox::create();
 	seedBox->setSize(140.f, 25.f);
@@ -129,15 +156,25 @@ void WorldGenGUI::initialize()
 	continentalArea->setText("Continental");
 	continentalArea->setTextSize(9u);
 
+	tgui::TextArea::Ptr continentalInfo = tgui::TextArea::create();
+	continentalInfo->setSize(145.f, 27.f);
+	continentalInfo->addText("Continent and ocean generation");
+	continentalInfo->setTextSize(9u);
+	continentalInfo->setReadOnly();
+	continentalArea->setToolTip(continentalInfo);
+
+
 	tgui::EditBox::Ptr landCruncherArea = tgui::EditBox::create(); //Distance of 21.f
-	landCruncherArea->setReadOnly();
-	landCruncherArea->setSize(70.f, 16.f);
+	registerHeader(landCruncherArea);
 	landCruncherArea->setPosition(388.f, 96.f);
 	landCruncherArea->setText("Cruncher");
-	landCruncherArea->setTextSize(9u);
-	landCruncherArea->setAlignment(tgui::EditBox::Alignment::Center);
-	//tgui::Label::Ptr lca = tgui::Label::create("As the value increases, continents become beefier");
-	//landCruncherArea->setToolTip(lca);
+
+	tgui::TextArea::Ptr landCruncherInfo = tgui::TextArea::create();
+	landCruncherInfo->setSize(145.f, 27.f);
+	landCruncherInfo->addText("As the value increases, continents become beefier");
+	landCruncherInfo->setTextSize(9u);
+	landCruncherInfo->setReadOnly();
+	landCruncherArea->setToolTip(landCruncherInfo);
 
 	tgui::EditBox::Ptr landCruncherBox = tgui::EditBox::create(); //Distance of 17.f
 	landCruncherBox->setSize(70.f, 25.f);
@@ -149,13 +186,18 @@ void WorldGenGUI::initialize()
 		this->F_manageNumInput(w, false, true);
 	});
 
+
 	tgui::EditBox::Ptr landPointArea = tgui::EditBox::create();
-	landPointArea->setReadOnly();
-	landPointArea->setSize(70.f, 16.f);
+	registerHeader(landPointArea);
 	landPointArea->setPosition(480.f, 96.f);
 	landPointArea->setText("Threshold");
-	landPointArea->setTextSize(9u);
-	landPointArea->setAlignment(tgui::EditBox::Alignment::Center);
+
+	tgui::TextArea::Ptr landPointInfo = tgui::TextArea::create();
+	landPointInfo->setSize(145.f, 44.f);
+	landPointInfo->addText("Specifies at what point water becomes land. Range is between -1.0 to 1.0");
+	landPointInfo->setTextSize(9u);
+	landPointInfo->setReadOnly();
+	landPointArea->setToolTip(landPointInfo);
 
 	tgui::EditBox::Ptr landPointBox = tgui::EditBox::create();
 	landPointBox->setSize(70.f, 25.f);
@@ -167,13 +209,18 @@ void WorldGenGUI::initialize()
 		this->F_manageNumInput(w, false, false);
 	});
 
+
 	tgui::EditBox::Ptr landSparsityArea = tgui::EditBox::create();
-	landSparsityArea->setReadOnly();
-	landSparsityArea->setSize(70.f, 16.f);
+	registerHeader(landSparsityArea);
 	landSparsityArea->setPosition(572.f, 96.f);
 	landSparsityArea->setText("Sparsity");
-	landSparsityArea->setTextSize(9u);
-	landSparsityArea->setAlignment(tgui::EditBox::Alignment::Center);
+
+	tgui::TextArea::Ptr landSparsityInfo = tgui::TextArea::create();
+	landSparsityInfo->setSize(145.f, 41.f);
+	landSparsityInfo->addText("As the value increases, both the ocean and continent sizes increase");
+	landSparsityInfo->setTextSize(9u);
+	landSparsityInfo->setReadOnly();
+	landSparsityArea->setToolTip(landSparsityInfo);
 
 	tgui::EditBox::Ptr landSparsityBox = tgui::EditBox::create();
 	landSparsityBox->setSize(70.f, 25.f);
@@ -194,13 +241,25 @@ void WorldGenGUI::initialize()
 	islandArea->setText("Islands");
 	islandArea->setTextSize(9u);
 
+	tgui::TextArea::Ptr islandInfo = tgui::TextArea::create();
+	islandInfo->setSize(145.f, 16.f);
+	islandInfo->addText("Island generation");
+	islandInfo->setTextSize(9u);
+	islandInfo->setReadOnly();
+	islandArea->setToolTip(islandInfo);
+
+
 	tgui::EditBox::Ptr islandCruncherArea = tgui::EditBox::create(); //Distance of 21.f
-	islandCruncherArea->setReadOnly();
-	islandCruncherArea->setSize(70.f, 16.f);
+	registerHeader(islandCruncherArea);
 	islandCruncherArea->setPosition(388.f, 169.f);
 	islandCruncherArea->setText("Cruncher");
-	islandCruncherArea->setTextSize(9u);
-	islandCruncherArea->setAlignment(tgui::EditBox::Alignment::Center);
+
+	tgui::TextArea::Ptr islandCruncherInfo = tgui::TextArea::create();
+	islandCruncherInfo->setSize(145.f, 27.f);
+	islandCruncherInfo->addText("As the value increases, islands become beefier");
+	islandCruncherInfo->setTextSize(9u);
+	islandCruncherInfo->setReadOnly();
+	islandCruncherArea->setToolTip(islandCruncherInfo);
 
 	tgui::EditBox::Ptr islandCruncherBox = tgui::EditBox::create(); //Distance of 17.f
 	islandCruncherBox->setSize(70.f, 25.f);
@@ -212,13 +271,18 @@ void WorldGenGUI::initialize()
 		this->F_manageNumInput(w, false, true);
 	});
 
+
 	tgui::EditBox::Ptr islandPointArea = tgui::EditBox::create();
-	islandPointArea->setReadOnly();
-	islandPointArea->setSize(70.f, 16.f);
+	registerHeader(islandPointArea);
 	islandPointArea->setPosition(472.f, 169.f);
 	islandPointArea->setText("Spawn Area");
-	islandPointArea->setTextSize(9u);
-	islandPointArea->setAlignment(tgui::EditBox::Alignment::Center);
+
+	tgui::TextArea::Ptr islandPointInfo = tgui::TextArea::create();
+	islandPointInfo->setSize(145.f, 84.f);
+	islandPointInfo->addText("Specifies at what point (in the water) islands are most likely to spawn. If value is bigger than the land threshold, no islands will spawn. Range is between -1.0 to 1.0");
+	islandPointInfo->setTextSize(9u);
+	islandPointInfo->setReadOnly();
+	islandPointArea->setToolTip(islandPointInfo);
 
 	tgui::EditBox::Ptr islandPointBox = tgui::EditBox::create();
 	islandPointBox->setSize(70.f, 25.f);
@@ -230,13 +294,18 @@ void WorldGenGUI::initialize()
 		this->F_manageNumInput(w, false, false);
 	});
 
+
 	tgui::EditBox::Ptr islandSparsityArea = tgui::EditBox::create();
-	islandSparsityArea->setReadOnly();
-	islandSparsityArea->setSize(70.f, 16.f);
+	registerHeader(islandSparsityArea);
 	islandSparsityArea->setPosition(556.f, 169.f);
 	islandSparsityArea->setText("Sparsity");
-	islandSparsityArea->setTextSize(9u);
-	islandSparsityArea->setAlignment(tgui::EditBox::Alignment::Center);
+
+	tgui::TextArea::Ptr islandSparsityInfo = tgui::TextArea::create();
+	islandSparsityInfo->setSize(145.f, 41.f);
+	islandSparsityInfo->addText("As the value increases, island size increases, but distribution decreases");
+	islandSparsityInfo->setTextSize(9u);
+	islandSparsityInfo->setReadOnly();
+	islandSparsityArea->setToolTip(islandSparsityInfo);
 
 	tgui::EditBox::Ptr islandSparsityBox = tgui::EditBox::create();
 	islandSparsityBox->setSize(70.f, 25.f);
@@ -248,13 +317,18 @@ void WorldGenGUI::initialize()
 		this->F_manageNumInput(w, false, true);
 	});
 
+
 	tgui::EditBox::Ptr islandPunishmentArea = tgui::EditBox::create();
-	islandPunishmentArea->setReadOnly();
-	islandPunishmentArea->setSize(70.f, 16.f);
+	registerHeader(islandPunishmentArea);
 	islandPunishmentArea->setPosition(640.f, 169.f);
 	islandPunishmentArea->setText("Submergement");
-	islandPunishmentArea->setTextSize(9u);
-	islandPunishmentArea->setAlignment(tgui::EditBox::Alignment::Center);
+
+	tgui::TextArea::Ptr islandPunishmentInfo = tgui::TextArea::create();
+	islandPunishmentInfo->setSize(145.f, 54.f);
+	islandPunishmentInfo->addText("As the value increases, islands become more \"submerged\" the farther they stray from their spawn area");
+	islandPunishmentInfo->setTextSize(9u);
+	islandPunishmentInfo->setReadOnly();
+	islandPunishmentArea->setToolTip(islandPunishmentInfo);
 
 	tgui::EditBox::Ptr islandPunishmentBox = tgui::EditBox::create();
 	islandPunishmentBox->setSize(70.f, 25.f);
@@ -275,13 +349,25 @@ void WorldGenGUI::initialize()
 	climateArea->setText("Climate");
 	climateArea->setTextSize(9u);
 
+	tgui::TextArea::Ptr climateInfo = tgui::TextArea::create();
+	climateInfo->setSize(145.f, 27.f);
+	climateInfo->addText("Heat generation. First piece of biome generation");
+	climateInfo->setTextSize(9u);
+	climateInfo->setReadOnly();
+	climateArea->setToolTip(climateInfo);
+
+
 	tgui::EditBox::Ptr useEquatorArea = tgui::EditBox::create();
-	useEquatorArea->setReadOnly();
-	useEquatorArea->setSize(70.f, 16.f);
+	registerHeader(useEquatorArea);
 	useEquatorArea->setPosition(620.f, 221.f);
 	useEquatorArea->setText("Use Equator");
-	useEquatorArea->setTextSize(9u);
-	useEquatorArea->setAlignment(tgui::EditBox::Alignment::Center);
+
+	tgui::TextArea::Ptr useEquatorInfo = tgui::TextArea::create();
+	useEquatorInfo->setSize(145.f, 77.f);
+	useEquatorInfo->addText("When enabled, the program will attempt to \"center\" heat on a vertical middle line, moving from [generated value] + 0 to [generated value] + [max change]");
+	useEquatorInfo->setTextSize(9u);
+	useEquatorInfo->setReadOnly();
+	useEquatorArea->setToolTip(useEquatorInfo);
 
 	tgui::ToggleButton::Ptr useEquatorBtn = tgui::ToggleButton::create();
 	useEquatorBtn->setSize(16.f, 16.f);
@@ -293,13 +379,18 @@ void WorldGenGUI::initialize()
 		w1->setEnabled(w->isDown()); w2->setEnabled(w->isDown());
 	});
 
+
 	tgui::EditBox::Ptr climateCruncherArea = tgui::EditBox::create(); //Distance of 21.f
-	climateCruncherArea->setReadOnly();
-	climateCruncherArea->setSize(70.f, 16.f);
+	registerHeader(climateCruncherArea);
 	climateCruncherArea->setPosition(388.f, 242.f);
 	climateCruncherArea->setText("Cruncher");
-	climateCruncherArea->setTextSize(9u);
-	climateCruncherArea->setAlignment(tgui::EditBox::Alignment::Center);
+
+	tgui::TextArea::Ptr climateCruncherInfo = tgui::TextArea::create();
+	climateCruncherInfo->setSize(145.f, 40.f);
+	climateCruncherInfo->addText("As the value increases, the climate becomes more \"extreme\"");
+	climateCruncherInfo->setTextSize(9u);
+	climateCruncherInfo->setReadOnly();
+	climateCruncherArea->setToolTip(climateCruncherInfo);
 
 	tgui::EditBox::Ptr climateCruncherBox = tgui::EditBox::create(); //Distance of 17.f
 	climateCruncherBox->setSize(70.f, 25.f);
@@ -311,13 +402,18 @@ void WorldGenGUI::initialize()
 		this->F_manageNumInput(w, false, true);
 	});
 
+
 	tgui::EditBox::Ptr climateRangeStartArea = tgui::EditBox::create();
-	climateRangeStartArea->setReadOnly();
-	climateRangeStartArea->setSize(70.f, 16.f);
+	registerHeader(climateRangeStartArea);
 	climateRangeStartArea->setPosition(472.f, 242.f);
 	climateRangeStartArea->setText("Range Start");
-	climateRangeStartArea->setTextSize(9u);
-	climateRangeStartArea->setAlignment(tgui::EditBox::Alignment::Center);
+
+	tgui::TextArea::Ptr climateRangeStartInfo = tgui::TextArea::create();
+	climateRangeStartInfo->setSize(145.f, 54.f);
+	climateRangeStartInfo->addText("Valid range is between 0 and 1.0. 0 (and lower) is extreme cold, while 1.0 (and higher) is extreme heat");
+	climateRangeStartInfo->setTextSize(9u);
+	climateRangeStartInfo->setReadOnly();
+	climateRangeStartArea->setToolTip(climateRangeStartInfo);
 
 	tgui::EditBox::Ptr climateRangeStartBox = tgui::EditBox::create();
 	climateRangeStartBox->setSize(70.f, 25.f);
@@ -329,13 +425,18 @@ void WorldGenGUI::initialize()
 		this->F_manageNumInput(w, false, false);
 	});
 
+
 	tgui::EditBox::Ptr climateRangeStopArea = tgui::EditBox::create();
-	climateRangeStopArea->setReadOnly();
-	climateRangeStopArea->setSize(70.f, 16.f);
+	registerHeader(climateRangeStopArea);
 	climateRangeStopArea->setPosition(556.f, 242.f);
 	climateRangeStopArea->setText("Range End");
-	climateRangeStopArea->setTextSize(9u);
-	climateRangeStopArea->setAlignment(tgui::EditBox::Alignment::Center);
+
+	tgui::TextArea::Ptr climateRangeStopInfo = tgui::TextArea::create();
+	climateRangeStopInfo->setSize(145.f, 54.f);
+	climateRangeStopInfo->addText("Valid range is between 0 and 1.0. 0 (and lower) is extreme cold, while 1.0 (and higher) is extreme heat");
+	climateRangeStopInfo->setTextSize(9u);
+	climateRangeStopInfo->setReadOnly();
+	climateRangeStopArea->setToolTip(climateRangeStopInfo);
 
 	tgui::EditBox::Ptr climateRangeStopBox = tgui::EditBox::create();
 	climateRangeStopBox->setSize(70.f, 25.f);
@@ -347,14 +448,19 @@ void WorldGenGUI::initialize()
 		this->F_manageNumInput(w, false, false);
 	});
 
+
 	tgui::EditBox::Ptr climateMaxModifyArea = tgui::EditBox::create();
-	climateMaxModifyArea->setReadOnly();
-	climateMaxModifyArea->setSize(70.f, 16.f);
+	registerHeader(climateMaxModifyArea);
 	climateMaxModifyArea->setPosition(640.f, 242.f);
 	climateMaxModifyArea->setText("Max Change");
-	climateMaxModifyArea->setTextSize(9u);
-	climateMaxModifyArea->setAlignment(tgui::EditBox::Alignment::Center);
 	climateMaxModifyArea->setEnabled(false);
+
+	tgui::TextArea::Ptr climateMaxModifyInfo = tgui::TextArea::create();
+	climateMaxModifyInfo->setSize(145.f, 64.f);
+	climateMaxModifyInfo->addText("The largest value added to the climate range in equator mode; the larger it is, the hotter the equator line will be");
+	climateMaxModifyInfo->setTextSize(9u);
+	climateMaxModifyInfo->setReadOnly();
+	climateMaxModifyArea->setToolTip(climateMaxModifyInfo);
 
 	tgui::EditBox::Ptr climateMaxModifyBox = tgui::EditBox::create();
 	climateMaxModifyBox->setSize(70.f, 25.f);
@@ -376,13 +482,25 @@ void WorldGenGUI::initialize()
 	moistureArea->setText("Humidity");
 	moistureArea->setTextSize(9u);
 
+	tgui::TextArea::Ptr moistureInfo = tgui::TextArea::create();
+	moistureInfo->setSize(145.f, 27.f);
+	moistureInfo->addText("Moisture generation. Final piece of biome generation");
+	moistureInfo->setTextSize(9u);
+	moistureInfo->setReadOnly();
+	moistureArea->setToolTip(moistureInfo);
+
+
 	tgui::EditBox::Ptr moistureCruncherArea = tgui::EditBox::create(); //Distance of 21.f
-	moistureCruncherArea->setReadOnly();
-	moistureCruncherArea->setSize(70.f, 16.f);
+	registerHeader(moistureCruncherArea);
 	moistureCruncherArea->setPosition(388.f, 315.f);
 	moistureCruncherArea->setText("Cruncher");
-	moistureCruncherArea->setTextSize(9u);
-	moistureCruncherArea->setAlignment(tgui::EditBox::Alignment::Center);
+
+	tgui::TextArea::Ptr moistureCruncherInfo = tgui::TextArea::create();
+	moistureCruncherInfo->setSize(145.f, 40.f);
+	moistureCruncherInfo->addText("As the value increases, humidity becomes more \"extreme\"");
+	moistureCruncherInfo->setTextSize(9u);
+	moistureCruncherInfo->setReadOnly();
+	moistureCruncherArea->setToolTip(moistureCruncherInfo);
 
 	tgui::EditBox::Ptr moistureCruncherBox = tgui::EditBox::create(); //Distance of 17.f
 	moistureCruncherBox->setSize(70.f, 25.f);
@@ -394,13 +512,18 @@ void WorldGenGUI::initialize()
 		this->F_manageNumInput(w, false, true);
 	});
 
+
 	tgui::EditBox::Ptr beachPointArea = tgui::EditBox::create();
-	beachPointArea->setReadOnly();
-	beachPointArea->setSize(70.f, 16.f);
+	registerHeader(beachPointArea);
 	beachPointArea->setPosition(480.f, 315.f);
 	beachPointArea->setText("Beach Point");
-	beachPointArea->setTextSize(9u);
-	beachPointArea->setAlignment(tgui::EditBox::Alignment::Center);
+
+	tgui::TextArea::Ptr beachPointInfo = tgui::TextArea::create();
+	beachPointInfo->setSize(145.f, 84.f);
+	beachPointInfo->addText("Signifies the point to where land is made into a coastal biome. If the value is smaller than the land threshold, no beaches will be present. Range is between -1.0 and 1.0");
+	beachPointInfo->setTextSize(9u);
+	beachPointInfo->setReadOnly();
+	beachPointArea->setToolTip(beachPointInfo);
 
 	tgui::EditBox::Ptr beachPointBox = tgui::EditBox::create();
 	beachPointBox->setSize(70.f, 25.f);
@@ -411,6 +534,13 @@ void WorldGenGUI::initialize()
 		auto w = gui.get<tgui::EditBox>("beachPointBox");
 		this->F_manageNumInput(w, false, true);
 	});
+
+	//********************************************************************************************* DECORATORS
+
+	tgui::Label::Ptr extraLabel = tgui::Label::create();
+	extraLabel->setPosition(5.f, 342.f);
+	extraLabel->setText("version: indev\nHold F4 to zoom. Hover over headers for more info");
+	extraLabel->setTextSize(9u);
 
 	//********************************************************************************************* GUI CONSTRUCTION
 
@@ -465,4 +595,18 @@ void WorldGenGUI::initialize()
 	gui.add(moistureCruncherBox, "moistureCruncherBox");
 	gui.add(beachPointArea, "beachPointArea");
 	gui.add(beachPointBox, "beachPointBox");
+
+	gui.add(extraLabel, "extraLabel");
+}
+
+
+/*********************************************************************************************
+Simplifies "header" or "area" creation - the text that hovers over an editable box
+*********************************************************************************************/
+void registerHeader(tgui::EditBox::Ptr header)
+{
+	header->setReadOnly();
+	header->setSize(70.f, 16.f);
+	header->setTextSize(9u);
+	header->setAlignment(tgui::EditBox::Alignment::Center);
 }

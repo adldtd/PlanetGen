@@ -77,7 +77,7 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 	float LANDCRUNCHER = land_cruncher; //Larger means beefier continents
 	float ISLANDCRUNCHER = island_cruncher; //Larger means beefier islands
 	float LANDPOINT = land_point; //Same effect as increasing landcruncher
-	float SPARSITY = sparsity; //This value works best at lengths 1472u 736u; larger means more space between land and sea
+	float SPARSITY = sparsity; //Larger means more space between land and sea
 	float ISPARSITY = i_sparsity; //Sparsity, but for islands
 	float IPOINT = i_point; //The point at which an island is most likely to spawn; farther from landpoint means farther from land
 	float IPUNISH = i_punish; //Larger means the island will become more submerged the farther it gets from IPOINT;
