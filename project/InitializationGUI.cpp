@@ -4,6 +4,7 @@
 
 void registerHeader(tgui::EditBox::Ptr header);
 
+
 /*********************************************************************************************
 Entirely responsible for the layout, styling, and functionality of the GUI upon loading
 *********************************************************************************************/
@@ -14,6 +15,25 @@ void WorldGenGUI::initialize()
 
 	map = ImageMap(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT);
 	map.fitToSpace(sf::Vector2f(MAP_SCREEN_X, MAP_SCREEN_Y), sf::Vector2f(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT), 0, 0, 130, 255, true); //Start with a map at the maximum screen size
+
+	//********************************************************************************************* CONSOLE GUI GROUP
+
+	tgui::Theme::Ptr theme = tgui::Theme::create("themes/InnerConsole.txt");
+
+	tgui::ChatBox::Ptr consoleBox = tgui::ChatBox::create();
+	consoleBox->setRenderer(theme->getRenderer("ChatBox"));
+	consoleBox->setSize(335.f, 100.f);
+	consoleBox->setPosition(15.f, 235.f);
+	consoleBox->setLineLimit(INNER_CONSOLE_MAX_LINES);
+	consoleBox->setTextSize(11u);
+	consoleBox->setTextColor(tgui::Color::White);
+	innerConsole = consoleBox;
+
+	tgui::Button::Ptr flushBtn = tgui::Button::create("Flush");
+	flushBtn->setSize(55.f, 16.f);
+	flushBtn->setPosition(295.f, 344.f);
+	flushBtn->setTextSize(11u);
+	flushBtn->onPress([this]() { this->F_flush(); });
 
 	//********************************************************************************************* GENERATION GUI GROUP
 
@@ -27,7 +47,8 @@ void WorldGenGUI::initialize()
 	cancelBtn->setTextSize(19u);
 	cancelBtn->setSize(95.f, 25.f);
 	cancelBtn->setPosition(140.f, 200.f);
-	cancelBtn->onPress([this]() { this->F_stopGeneration(); });
+	cancelBtn->onPress([this]()
+	{ this->F_stopGeneration(); });
 
 	tgui::Button::Ptr saveBtn = tgui::Button::create("Save");
 	saveBtn->setTextSize(19u);
@@ -543,6 +564,9 @@ void WorldGenGUI::initialize()
 	extraLabel->setTextSize(9u);
 
 	//********************************************************************************************* GUI CONSTRUCTION
+
+	gui.add(consoleBox, "consoleBox");
+	gui.add(flushBtn, "flushBtn");
 
 	gui.add(startBtn, "startBtn");
 	gui.add(cancelBtn, "cancelBtn");

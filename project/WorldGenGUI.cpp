@@ -4,6 +4,7 @@
 #include "Globals.h"
 #include "save.h"
 #include <climits>
+#include "PlanetGenerator.h"
 
 WorldGenGUI::WorldGenGUI(sf::RenderWindow* w)
 {
@@ -42,6 +43,24 @@ void WorldGenGUI::setTarget(sf::RenderWindow* w)
 {
 	window = w;
 	gui.setTarget(*w);
+}
+
+/*********************************************************************************************
+Prints a string into the GUI's console; type = 0 : normal, type = 1 : error, type = 2 : warn
+*********************************************************************************************/
+void WorldGenGUI::writeToConsole(std::string s, unsigned char type)
+{
+	phone.lock(); //Used for safety, as the planet generation function takes in innerConsole directly
+
+	if (type == 1)
+		innerConsole->setTextColor(tgui::Color::Red);
+	else if (type == 2)
+		innerConsole->setTextColor(tgui::Color::Yellow);
+
+	innerConsole->addLine(s);
+	innerConsole->setTextColor(tgui::Color::White);
+
+	phone.unlock();
 }
 
 
@@ -441,6 +460,7 @@ void WorldGenGUI::F_startGeneration()
 	{
 		lastProgress = progress;
 		incomplete = true;
+		this->writeToConsole("Error: Not enough memory for a map of dimensions " + std::to_string(lengthX) + "," + std::to_string(lengthY) + ".", 1);
 		return;
 	}
 	map.fitToSpace(sf::Vector2f(MAP_SCREEN_X, MAP_SCREEN_Y), sf::Vector2f(MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT), 0, 0, 130, 255, true); //This function loads the map
@@ -451,6 +471,7 @@ void WorldGenGUI::F_startGeneration()
 		map.reform(0u, 0u); //Erase the map
 		lastProgress = progress;
 		incomplete = true;
+		this->writeToConsole("Error: Not enough memory for a map of dimensions " + std::to_string(lengthX) + "," + std::to_string(lengthY) + ".", 1);
 		return;
 	}
 
@@ -463,10 +484,11 @@ void WorldGenGUI::F_startGeneration()
 
 	auto gen = [this]()
 	{
-		generateEarth(lengthX, lengthY, "earth.bin", buffer, elevation, moisture, climate, inProgress, progress, stage, seed, &phone, true);
+		generateEarth(lengthX, lengthY, buffer, elevation, moisture, climate, inProgress, progress, stage, seed, &phone, true, innerConsole);
 	};
 
 	t2 = std::thread(gen); //Automatically starts execution
+	this->writeToConsole("Started generation (seed: " + seedString + ").");
 }
 
 /*********************************************************************************************
@@ -474,18 +496,25 @@ Flags world generation to stop, and waits for the thread to end
 *********************************************************************************************/
 void WorldGenGUI::F_stopGeneration()
 {
+	bool wasInProgress = false;
+
 	phone.lock();
 	if (inProgress)
 	{
+		wasInProgress = true;
 		inProgress = false; //Abort the other thread
 		incomplete = true; //Is now unsavable
 	}
 	phone.unlock();
+
 	if (t2.joinable())
 	{
 		t2.join(); //Wait until task is aborted
 		std::cout << "Cancelled" << std::endl;
 	}
+
+	if (wasInProgress)
+		this->writeToConsole("Generation stopped.");
 }
 
 /*********************************************************************************************
@@ -493,7 +522,7 @@ Saves the loaded map as a PNG image
 *********************************************************************************************/
 void WorldGenGUI::F_saveImage()
 {
-	phone.lock();
+	phone.lock(); //Failsafe incase this is somehow called while the map is being created
 	if (inProgress)
 	{
 		phone.unlock();
@@ -501,15 +530,15 @@ void WorldGenGUI::F_saveImage()
 	}
 	phone.unlock();
 
-	unsigned char** colors = this->export_color_map();
+	unsigned char **colors = this->export_color_map();
 	if (!colors)
 	{
-		std::cout << "The map could not be saved." << std::endl;
+		this->writeToConsole("Error: Not enough memory to save a map of dimensions " + std::to_string(lengthX) + "," + std::to_string(lengthY) + ".", 1);
 		return;
 	}
 
 	if (!save(colors, seedString.c_str(), lengthX, lengthY))
-		std::cout << "The map could not be saved." << std::endl;
+		this->writeToConsole("Error: Not enough memory to save a map of dimensions " + std::to_string(lengthX) + "," + std::to_string(lengthY) + ".", 1);
 }
 
 /*********************************************************************************************
@@ -570,4 +599,21 @@ void WorldGenGUI::F_scaleInput(tgui::EditBox::Ptr box, unsigned int limit)
 	else
 		box->setDefaultText(box->getText());
 	box->onTextChange.setEnabled(true);
+}
+
+/*********************************************************************************************
+Erases all messages sent into innerConsole
+*********************************************************************************************/
+void WorldGenGUI::F_flush()
+{
+	phone.lock();
+
+	if (innerConsole->getLineAmount() == 0)
+	{
+		phone.unlock();
+		return;
+	}
+	innerConsole->removeAllLines();
+
+	phone.unlock();
 }

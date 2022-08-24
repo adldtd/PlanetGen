@@ -22,12 +22,15 @@ public:
 	void handleEvents(sf::Event& event);
 	void draw();
 
+	void writeToConsole(std::string s, unsigned char type = 0); //Displays generation/error information for the end user
+
 private:
 
-	tgui::GuiSFML gui; //Both are public for easier window access
+	tgui::GuiSFML gui;
 	ImageMap map = ImageMap(0u, 0u); //Represents the image of the world to be drawn
 	sf::RectangleShape background; //Image behind the GUI
 	sf::RectangleShape displayBackground; //Colored rectangle behind the world display
+	tgui::ChatBox::Ptr innerConsole = nullptr; //Pointer to the console box shown in the GUI
 
 	bool holdingF4;
 
@@ -36,8 +39,9 @@ private:
 
 	const int MAP_SCREEN_WIDTH = 368; //The space the map gets
 	const int MAP_SCREEN_HEIGHT = 184;
-	const int MAP_SCREEN_X = 0;
+	const int MAP_SCREEN_X = 0; //Where the map is placed
 	const int MAP_SCREEN_Y = 0;
+	const int INNER_CONSOLE_MAX_LINES = 50; //Max amount of text lines in the inner console
 
 	std::thread t2;
 	std::mutex phone;
@@ -67,7 +71,7 @@ private:
 	void free_values(); //Delete those values; free memory up
 
 	void fillImageMap(); //Update every tile of map with buffer values
-	unsigned char** export_color_map() const; //Creates an array of byte colors to be passed to the save function
+	unsigned char **export_color_map() const; //Creates an array of byte colors to be passed to the save function
 	
 	static unsigned int transformSeed(std::string seed); //Converts a seed into a numerical value using a pseudorandom function
 	static std::string randomSeed(unsigned int limit); //Returns a string filled with random characters
@@ -77,4 +81,5 @@ private:
 	void F_saveImage();
 	void F_manageNumInput(tgui::EditBox::Ptr box, bool forceInt = false, bool forceUnsigned = false); //Stops users from entering non-numerical input
 	void F_scaleInput(tgui::EditBox::Ptr box, unsigned int limit); //Limits input to a certain amount of characters
+	void F_flush(); //Clears innerConsole
 };

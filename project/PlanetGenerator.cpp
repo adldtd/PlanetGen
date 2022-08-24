@@ -6,6 +6,7 @@
 #include <mutex>
 #include "PerlinNoise.hpp"
 #include "PlanetGenerator.h"
+#include "WorldGenGUI.h"
 #include "Globals.h"
 
 
@@ -49,9 +50,9 @@
 */
 
 
-void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileLocation, char* buffer, float* elevation,
-				   float* moisture, float* climate, bool& inProgress, int &progress, int &stage, unsigned int seed, 
-				   std::mutex* phone, bool useMutex)
+void generateEarth(unsigned int lengthX, unsigned int lengthY, char* buffer, float* elevation,
+	float* moisture, float* climate, bool& inProgress, int& progress, int& stage, unsigned int seed,
+	std::mutex* phone, bool useMutex, tgui::ChatBox::Ptr innerConsole)
 {
 
 	if (seed == 0) {
@@ -108,7 +109,11 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 
 
 	std::cout << "Generating terrain" << std::endl;
-	for (int r = 0; r < lengthY; r++) { //Continent + island generation
+	if (useMutex) phone->lock();
+	innerConsole->addLine("\t- Generating terrain...");
+	if (useMutex) phone->unlock();
+
+	for (int r = 0; r < lengthY; r++) { ////////////////////////////////////////////////////////////////Continent + island generation
 
 		float angleY = 0.f;
 		if (polarY)
@@ -206,14 +211,18 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 		}
 	}
 
-	
+
 
 	std::cout << "Generating heat" << std::endl;
+	if (useMutex) phone->lock();
+	innerConsole->addLine("\t- Generating heat...");
+	if (useMutex) phone->unlock();
+
 	siv::PerlinNoise::seed_type climateSeed = rand();
 	siv::PerlinNoise clgen{ climateSeed };
 	//double factor = 1.0 / normalFunction(equator, equator, 100.0); //Range is from 1 to 0
 
-	for (int r = 0; r < lengthY; r++) { //Climate mapping
+	for (int r = 0; r < lengthY; r++) { //////////////////////////////////////////////////////////////////////////////Climate mapping
 
 		float angleY = 0.f;
 		if (polarY)
@@ -257,7 +266,7 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 				heatValue = clgen.noise2D(c / SPARSITY, r / SPARSITY) + clgen.octave2D(c / SPARSITY, r / SPARSITY, 6);
 				heatValue *= CLIMATECRUNCHER;
 			}
-			
+
 			heatValue = normalizeToRange(-1, 1, RANGESTART + modify, RANGEEND + modify, heatValue);
 
 			//double heatModifier = clgen.noise2D(c / 550.0, r / 550.0) + clgen.octave2D(c / 550.0, r / 550.0, 3); //From about -1.52 to 1.52
@@ -289,7 +298,11 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 
 
 	std::cout << "Generating biomes" << std::endl;
-	for (int r = 0; r < lengthY; r++) { //Biome generation
+	if (useMutex) phone->lock();
+	innerConsole->addLine("\t- Generating biomes...");
+	if (useMutex) phone->unlock();
+
+	for (int r = 0; r < lengthY; r++) { /////////////////////////////////////////////////////////////////////////////Biome generation
 
 		float angleY = 0.f;
 		if (polarY)
@@ -767,6 +780,7 @@ void generateEarth(unsigned int lengthX, unsigned int lengthY, std::string fileL
 	std::cout << "Complete" << std::endl;
 
 	if (useMutex) phone->lock();
+	innerConsole->addLine("\t- Generation complete.");
 	inProgress = false;
 	if (useMutex) phone->unlock();
 }
