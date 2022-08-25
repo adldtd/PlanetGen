@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-	int save(unsigned char** colors, const char* seed, unsigned int lengthX, unsigned int lengthY);
+	int save(unsigned char** colors, const char* seed, unsigned int lengthX, unsigned int lengthY, const char *fp, int fp_len);
 
 #ifdef __cplusplus
 }

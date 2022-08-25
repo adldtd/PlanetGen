@@ -4,6 +4,7 @@
 #include "Globals.h"
 #include "save.h"
 #include <climits>
+#include <direct.h>
 #include "PlanetGenerator.h"
 
 WorldGenGUI::WorldGenGUI(sf::RenderWindow* w)
@@ -213,6 +214,7 @@ void WorldGenGUI::handleEvents(sf::Event& event)
 			gui.get<tgui::Button>("startBtn")->onPress.setEnabled(false);
 			gui.get<tgui::Button>("cancelBtn")->onPress.setEnabled(false);
 			gui.get<tgui::Button>("saveBtn")->onPress.setEnabled(false);
+			gui.get<tgui::Button>("flushBtn")->onPress.setEnabled(false);
 			holdingF4 = true;
 		}
 	}
@@ -229,6 +231,7 @@ void WorldGenGUI::handleEvents(sf::Event& event)
 			gui.get<tgui::Button>("startBtn")->onPress.setEnabled(true);
 			gui.get<tgui::Button>("cancelBtn")->onPress.setEnabled(true);
 			gui.get<tgui::Button>("saveBtn")->onPress.setEnabled(true);
+			gui.get<tgui::Button>("flushBtn")->onPress.setEnabled(true);
 			holdingF4 = false;
 		}
 	}
@@ -530,15 +533,28 @@ void WorldGenGUI::F_saveImage()
 	}
 	phone.unlock();
 
-	unsigned char **colors = this->export_color_map();
+	unsigned char** colors = this->export_color_map();
 	if (!colors)
 	{
 		this->writeToConsole("Error: Not enough memory to save a map of dimensions " + std::to_string(lengthX) + "," + std::to_string(lengthY) + ".", 1);
 		return;
 	}
 
-	if (!save(colors, seedString.c_str(), lengthX, lengthY))
+	std::stringstream stream;
+	stream << std::hex << (unsigned int)time(NULL);
+	std::string file_path = "map_" + stream.str() + ".png";
+
+	if (!save(colors, seedString.c_str(), lengthX, lengthY, file_path.c_str(), file_path.length()))
+	{
 		this->writeToConsole("Error: Not enough memory to save a map of dimensions " + std::to_string(lengthX) + "," + std::to_string(lengthY) + ".", 1);
+		return;
+	}
+
+	char workingDir[_MAX_PATH + 1];
+	if (!_getcwd(workingDir, _MAX_PATH + 1))
+		this->writeToConsole("Map saved as " + file_path + " in the current working directory.");
+	else
+		this->writeToConsole("Map saved as " + std::string(workingDir) + "\\" + file_path);
 }
 
 /*********************************************************************************************

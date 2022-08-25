@@ -6,15 +6,11 @@
 
 
 
-int save(unsigned char **colors, const char *seed, unsigned int lengthX, unsigned int lengthY)
+int save(unsigned char **colors, const char *seed, unsigned int lengthX, unsigned int lengthY, const char *fp, int fp_len)
 {
-	char file_path[100] = "";
-	char t[20] = ""; sprintf_s(t, 20, "%x", (unsigned int)time(NULL));
-	strcat(file_path, "map_"); strcat(file_path, t); strcat(file_path, ".png"); //Careful that buffer overflow does not occur here
-
 
 	FILE *img;
-	fopen_s(&img, file_path, "wb");
+	fopen_s(&img, fp, "wb");
 	if (!img)
 	{
 		printf("An error occured while constructing the file.\n");
@@ -51,12 +47,6 @@ int save(unsigned char **colors, const char *seed, unsigned int lengthX, unsigne
 	
 	png_write_end(png_ptr, png_info);
 	png_destroy_write_struct(&png_ptr, &png_info);
-
-	char cwd[_MAX_PATH + 1] = "";
-	if (!_getcwd(cwd, _MAX_PATH + 1)) //********************************************* _MAX_PATH IS NOT AN ABSOLUTE FILE PATH LIMIT
-		printf("Map saved as %s in the current working directory\n", file_path);
-	else
-		printf("Map saved as %s\\%s\n", cwd, file_path);
 
 	fclose(img);
 
